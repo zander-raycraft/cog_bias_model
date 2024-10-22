@@ -12,6 +12,7 @@
  * s
  */
 NetworkNode::NetworkNode(int inputs)
+    : weightVec(inputs), biasVal(0.0), output(0.0)
 {
     std::srand(std::time(0));
     for(int i = 0; i < inputs; i++)
@@ -25,7 +26,7 @@ NetworkNode::NetworkNode(int inputs)
  * 
  * @breif: destructor for the networkNode class
  */
-NetworkNode::~NetworkNode()
+NetworkNode::~NetworkNode() noexcept
 {
 
 }

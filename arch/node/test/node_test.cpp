@@ -1,6 +1,21 @@
-#include <iostream>
+#include <gtest/gtest.h>
+#include "../headr/node.h"
 
-int main() {
-    std::cout << "";
-    return 0;
+// Test fixture (if needed)
+class NodeTest : public ::testing::Test {
+protected:
+};
+
+// Sample test
+TEST_F(NodeTest, DefaultConstructor) {
+    int numInputs = 5;
+    NetworkNode node(numInputs);
+    testNetworkNode(numInputs); 
+}
+
+// No need for a main function, Google Test provides its own
+
+void testNetworkNode(int numInputs) {
+    NetworkNode node(numInputs);
+    EXPECT_EQ(node.weightVec.size(), numInputs);
 }

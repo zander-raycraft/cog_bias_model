@@ -73,6 +73,13 @@ class NetworkNode
          */
         void set(double bias) noexcept;
 
+        /**
+         * 
+         * @breif: friend function for the gtest file
+         * 
+         */
+        friend void testNetworkNode(int inputNodes);
+
     private:
         std::vector<double> weightVec;
         double biasVal;
