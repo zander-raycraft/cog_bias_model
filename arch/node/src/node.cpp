@@ -23,6 +23,15 @@ NetworkNode::NetworkNode(int inputs)
 
 /**
  * 
+ * @breif: destructor for the networkNode class
+ */
+NetworkNode::~NetworkNode()
+{
+
+}
+
+/**
+ * 
  * @breif: Calculates the output of the node for the inputs coming in
  * 
  * @param: inputs ->  type: vector<double>, input values for the node
@@ -66,10 +75,11 @@ double NetworkNode::get() const noexcept
 /**
  * @brief: set function for the biases
  */
-void NetworkNode::set(double newVal)
+void NetworkNode::set(double newVal) noexcept
 {
     biasVal = newVal;
 }
+
 
 
 
