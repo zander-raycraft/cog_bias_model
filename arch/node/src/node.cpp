@@ -12,15 +12,15 @@
  * s
  */
 NetworkNode::NetworkNode(int inputs)
-    : weightVec(inputs), biasVal(0.0), output(0.0)
+        : weightVec(inputs), biasVal(0.0), output(0.0)
 {
-    std::srand(std::time(0));
+    // Set the weights to random values
     for(int i = 0; i < inputs; i++)
     {
-        weightVec.push_back((std::rand() / double(RAND_MAX)) * 2 - 1);
+        weightVec[i] = (std::rand() / double(RAND_MAX)) * 2 - 1;
     }
     biasVal = ((std::rand() / double(RAND_MAX)) * 2 - 1);
-};
+}
 
 /**
  * 
