@@ -10,9 +10,19 @@
  * 
  */
 
-class NetworkNode {
+class NetworkNode 
+{
     public:
         NetworkNode(int num_in); //dfault ctor
+
+        NetworkNode(const NetworkNode& base);
+        
+        /**
+         * 
+         * @breif: destructor for the networkNode class
+         */
+        ~NetworkNode();
+
 
         /**
          * 
