@@ -15,13 +15,30 @@ class NetworkNode
     public:
         NetworkNode(int num_in); //dfault ctor
 
+        /**
+         * 
+         * @breif: copy constructor for node
+         * 
+         * @param: base -> type: NetworkNode&, node to copy;
+         * 
+         */
         NetworkNode(const NetworkNode& base);
-        
+
+        /**
+         * 
+         * @breif: assignment operator for the node class
+         * 
+         * @param: base -> type: NetworkNode&, the node value being assigned to the caller node
+         * @return: NetworkNode& -> modified network node address
+         * 
+         */
+        NetworkNode& operator=(const NetworkNode& base) noexcept;
+
         /**
          * 
          * @breif: destructor for the networkNode class
          */
-        ~NetworkNode();
+        ~NetworkNode() noexcept;
 
 
         /**
@@ -32,7 +49,7 @@ class NetworkNode
          * @return: output -> type: double, calculated output post weighted sum, bias, and
          *                      activation function
          */
-        double find_output(const std::vector<double>& inputs);
+        double find_output(const std::vector<double>& inputs) noexcept;
 
         /**
          * 
@@ -41,7 +58,7 @@ class NetworkNode
          * @param nodeInfo -> type: double, the weighted sum of inputs plus bias
          * @return formattedOutput -> type: double, the result of applying the activation function
          */
-        double activation_func(double nodeInfo);
+        double activation_func(double nodeInfo) noexcept;
 
         /**
          * 
@@ -49,12 +66,12 @@ class NetworkNode
          * 
          * @return nodeOutput -> type: double, the nodes outptut
          */
-        double get() const;
+        double get() const noexcept;
 
         /**
          * @brief: set function for the biases
          */
-        void set(double bias);
+        void set(double bias) noexcept;
 
     private:
         std::vector<double> weightVec;
