@@ -6,13 +6,13 @@ LDFLAGS = -L/opt/homebrew/opt/googletest/lib -lgtest -lgtest_main -pthread
 # Directories
 NODE_SRC_DIR = ./arch/node/src
 NODE_TEST_DIR = ./arch/node/src
-OBJ_DIR = ./build
-BIN_DIR = ./bin
+OBJ_DIR = $(shell mkdir -p build && echo ./build)
+BIN_DIR := $(shell mkdir -p bin && echo ./bin)
 
 # Files
-NODE_SRC = $(wildcard $(NODE_SRC_DIR)/.cpp)
+NODE_SRC = $(wildcard $(NODE_SRC_DIR)/*.cpp)
 NODE_TEST_SRC = $(wildcard $(NODE_SRC_DIR)/node_test.cpp)
-NNODE_OBJ = $(patsubst $(NODE_SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(NODE_SRC))
+NODE_OBJ = $(patsubst $(NODE_SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(NODE_SRC))
 NODE_TEST_OBJ = $(patsubst $(NODE_SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(NODE_TEST_SRC))
 
 TARGET = $(BIN_DIR)/run_tests
