@@ -16,6 +16,5 @@ void testNetworkNode(int numInputs) {
 // Sample test
 TEST_F(NodeTest, DefaultConstructor) {
     int numInputs = 5;
-    NetworkNode node(numInputs);
     testNetworkNode(numInputs); 
 }
