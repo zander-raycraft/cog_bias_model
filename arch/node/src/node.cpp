@@ -75,7 +75,7 @@ NetworkNode::NetworkNode(int inNum, int outNum)
  * @param: base -> type: const NetworkNode&, node to copy;
  *
  */
-NetworkNode::NetworkNode(const NetworkNode& base) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
+NetworkNode::NetworkNode(const NetworkNode& base) noexcept
         : weightVec(), biasVal(base.biasVal), output(base.output), numOutput(base.numOutput)
 {
     try {
@@ -97,27 +97,19 @@ NetworkNode::NetworkNode(const NetworkNode& base) noexcept // NOT TESTED {{{{{{{
  * @return: NetworkNode& -> modified network node address
  *
  */
-NetworkNode& NetworkNode::operator=(const NetworkNode& base) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
-{
+NetworkNode& NetworkNode::operator=(const NetworkNode& base) noexcept {
     if (this != &base) {
-        try
-        {
-            std::vector<double> newWeightVec;
-            newWeightVec.reserve(base.weightVec.size());
-            newWeightVec.insert(newWeightVec.end(), base.weightVec.begin(), base.weightVec.end());
+        // Prepare newWeightVec and ensure it won't throw
+        weightVec.clear();
+        weightVec.reserve(base.weightVec.size());
+        weightVec.insert(weightVec.end(), base.weightVec.begin(), base.weightVec.end());
 
-            // update all values
-            weightVec = std::move(newWeightVec);
-            biasVal = base.biasVal;
-            output = base.output;
-            numOutput = base.numOutput;
-        } catch (const std::exception& e)
-        {
-            throw std::runtime_error("NetworkNode operator= failed");
-        }
+        // Assign scalar values which are noexcept by default
+        biasVal = base.biasVal;
+        output = base.output;
+        numOutput = base.numOutput;
     }
     return *this;
-
 }
 
 /**
@@ -156,7 +148,7 @@ double NetworkNode::find_output(const std::vector<double>& inputs) noexcept // N
  * @param nodeInfo -> type: double, the weighted sum of inputs plus bias
  * @return formattedOutput -> type: double, the result of applying the activation function
  */
-double NetworkNode::activation_func(double nodeInfo) noexcept
+double NetworkNode::activation_func(double nodeInfo) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}}
 {
     return std::tanh(nodeInfo);
 };

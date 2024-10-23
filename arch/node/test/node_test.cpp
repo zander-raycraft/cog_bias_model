@@ -133,3 +133,66 @@ TEST_F(NodeTest, CopyConstructor)
     delete oneValNode;
     delete node;
 }
+
+/**
+* @breif: test to assignment operator
+*/
+TEST_F(NodeTest, AssignmentOperator)
+{
+    // Test 1: check values
+    auto* nonCopyNode = new NetworkNode(5);
+    auto* copyNode = new NetworkNode(7);
+
+    *copyNode = *nonCopyNode;
+    EXPECT_EQ(copyNode->getWeightVecSize(), 5) << "Failed in assignment scenario - weight size"; //Vec size
+    EXPECT_EQ(copyNode->getOutputNum(), 1) << "Failed in assignment scenario - output num"; //Output num
+
+    // bias check
+    EXPECT_GE(copyNode->getBiasVal(), -1.0) << "Bias less than -1 after assignment";
+    EXPECT_LE(copyNode->getBiasVal(), 1.0) << "Bias greater than 1 after assignment";
+
+    EXPECT_EQ(copyNode->getOutput(), 0.0) << "Failed in assignment scenario - output"; //Output
+    delete nonCopyNode;
+    delete copyNode;
+
+    // Test 2: Checking assignment operator from different constructor calls
+    auto* oneParamNode = new NetworkNode(3);
+    auto* twoParamNode = new NetworkNode(5, 7);
+    *oneParamNode = *twoParamNode;
+    EXPECT_EQ(oneParamNode->getWeightVecSize(), 5) << "Failed in double parameter constructor - vec size"; //Vec size
+    EXPECT_EQ(oneParamNode->getOutputNum(), 7) << "Failed in double parameter constructor - output"; //Output num
+
+    EXPECT_GE(oneParamNode->getBiasVal(), -1.0) << "Bias less than -1 after assignment [double input]";
+    EXPECT_LE(oneParamNode->getBiasVal(), 1.0) << "Bias greater than 1 after assignment [double input]";
+
+    EXPECT_EQ(oneParamNode->getOutput(), 0.0) << "Failed in double parameter constructor - output"; //Output
+    delete oneParamNode;
+    delete twoParamNode;
+
+    // Test 3: self assignment
+    auto* selfNode = new NetworkNode(5);
+    *selfNode = *selfNode;
+    EXPECT_EQ(selfNode->getWeightVecSize(), 5) << "Failed in self-assignment scenario"; //Vec size
+    EXPECT_EQ(selfNode->getOutputNum(), 1) << "Failed in self-assignment scenario"; //Output num
+
+    EXPECT_GE(selfNode->getBiasVal(), -1.0) << "Bias less than -1 after assignment [self-assignment]";
+    EXPECT_LE(selfNode->getBiasVal(), 1.0) << "Bias greater than 1 after assignment [self-assignment]";
+
+    EXPECT_EQ(selfNode->getOutput(), 0.0) << "Failed in self-assignment scenario"; //Output
+    delete selfNode;
+
+    // Test 4: check if it is copying a smaller vector
+    auto* smallVecNode = new NetworkNode(3);
+    auto* bigVecNode = new NetworkNode(5, 7);
+    *smallVecNode = *bigVecNode;
+    EXPECT_EQ(smallVecNode->getWeightVecSize(), 5) << "Failed in assigning smaller value - vec size"; //Vec size
+    EXPECT_EQ(smallVecNode->getOutputNum(), 7) << "Failed in assigning smaller value - output num"; //Output num
+
+    EXPECT_GE(smallVecNode->getBiasVal(), -1.0) << "Bias less than -1 after assignment [smaller vector]";
+    EXPECT_LE(smallVecNode->getBiasVal(), 1.0) << "Bias greater than 1 after assignment [smaller vector]";
+
+    EXPECT_EQ(smallVecNode->getOutput(), 0.0) << "Failed in assigning smaller value - output"; //Output
+    delete smallVecNode;
+    delete bigVecNode;
+
+}
