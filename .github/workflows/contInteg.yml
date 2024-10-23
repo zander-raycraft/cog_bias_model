@@ -1,0 +1,34 @@
+name: Integration Worklfow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Set up CMake
+        uses: jwielander/setup-cmake@v3
+
+      - name: install dependencies
+        run: | 
+          brew install eigen
+          brew install googletest
+
+      - name: make
+        run: |
+          make clean
+          make
+
+      - name: test
+        run: |
+          make test
+          

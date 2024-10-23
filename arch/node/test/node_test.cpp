@@ -310,7 +310,7 @@ TEST_F(NodeTest, Destructor)
   TEST_F(NodeTest, ActivationFunction)
   {
       // Test 1: check if function is correct
-      NetworkNode* node = new NetworkNode(3);
+      auto* node = new NetworkNode(3);
       double inputZero = 0.0;
       double outputZero = node->activation_func(inputZero);
       ASSERT_NEAR(outputZero, 0.0, 1e-5) << "Failed to calculate tanh(0) correctly";
