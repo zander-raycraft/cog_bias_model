@@ -2,16 +2,28 @@
 #include "../headr/node.h"
 #include <cstdlib>
 #include <ctime>
+#include <mach/mach.h>
 
 // Test fixture
-class NodeTest : public ::testing::Test {
-protected:
-    void SetUp() override
+class NodeTest : public ::testing::Test {};
+
+/**
+ *
+ * @brief Utility function to get the current memory usage of the process.
+ *
+ * @return Memory usage in bytes.
+ */
+size_t getCurrentRSS()
+{
+    struct mach_task_basic_info info;
+    mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+    if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info,
+                  &infoCount) != KERN_SUCCESS)
     {
-        // Set a random seed before running tests to ensure different random values
-        std::srand(static_cast<unsigned int>(std::time(nullptr)));
+        return 0L; // Unable to get task info
     }
-};
+    return info.resident_size;
+}
 
 //ignore this line it is for github debugging
 
@@ -196,5 +208,130 @@ TEST_F(NodeTest, AssignmentOperator)
     EXPECT_EQ(smallVecNode->getOutput(), 0.0) << "Failed in assigning smaller value - output"; //Output
     delete smallVecNode;
     delete bigVecNode;
-
 }
+
+/**
+* @breif: test for the destructor
+*/
+#ifdef __APPLE__
+
+TEST_F(NodeTest, Destructor)
+{
+    /**
+     *
+     * NOTE: This test will not run and is designed not to run
+     *       if you are not on macOS as the help is built for mac architecture
+     *
+     */
+
+    // Test 1: Does the vec get removed from memory
+    size_t memoryBefore = getCurrentRSS();
+
+    auto* node = new NetworkNode(5);
+    size_t memoryAfterAllocation = getCurrentRSS();
+    size_t allocatedMemory = memoryAfterAllocation - memoryBefore;
+
+    ASSERT_EQ(node->getWeightVecSize(), 5) << "Failed to initialize weight vector size correctly";
+    ASSERT_GE(node->getBiasVal(), -1.0) << "Bias value out of expected range";
+    ASSERT_LE(node->getBiasVal(), 1.0) << "Bias value out of expected range";
+
+    delete node;
+    size_t memoryAfterDeletion = getCurrentRSS();
+    size_t deallocatedMemory = memoryAfterAllocation - memoryAfterDeletion;
+    // padding 1024 to account for system memory overhead
+    ASSERT_LE(std::abs(static_cast<long>(deallocatedMemory - allocatedMemory)), 1024)
+                                << "Memory was not properly deallocated after deletion.";
+}
+#endif
+
+/**
+ * @breif: test for find_output
+ */
+ TEST_F(NodeTest, FindOutput)
+ {
+     // Test 1: check if value is correctly calculated
+     NetworkNode node(3);
+     std::vector<double> inputs = {0.5, -0.3, 0.7};
+     double output = node.activation_func(node.find_output(inputs));
+
+     // Manually calculate the expected output
+     double expectedWeightedSum = 0;
+     for (size_t i = 0; i < inputs.size(); ++i) {
+         expectedWeightedSum += inputs[i] * node.getWeightVecElement(i);
+     }
+     expectedWeightedSum += node.getBiasVal();
+     double expectedOutput = std::tanh(expectedWeightedSum);
+     ASSERT_NEAR(output, expectedOutput, 1e-5) << "Failed to calculate correct output value";
+
+     // Test 2: check what happens if input is smaller
+     std::vector<double> mismatchedInputs = {0.5, -0.3};
+     double outputMismatch = node.activation_func(node.find_output(mismatchedInputs));
+     ASSERT_EQ(outputMismatch, 0.0) << "Failed to handle mismatched input vector size";
+
+     // Test 3: All zero inputs
+     std::vector<double> zeroInputs(3, 0.0); // {0.0, 0.0, 0.0}
+     double outputZeroInputs = node.activation_func(node.find_output(zeroInputs));
+     double expectedZeroOutput = std::tanh(node.getBiasVal());
+     ASSERT_NEAR(outputZeroInputs, expectedZeroOutput, 1e-5) << "Failed to handle all zero inputs";
+
+     // Test 4: All positive inputs
+     std::vector<double> positiveInputs = {1.0, 1.0, 1.0};
+     double outputPositive = node.activation_func(node.find_output(positiveInputs));
+     double expectedPositiveSum = 0;
+     for (size_t i = 0; i < positiveInputs.size(); ++i)
+     {
+         expectedPositiveSum += positiveInputs[i] * node.getWeightVecElement(i);
+     }
+     expectedPositiveSum += node.getBiasVal();
+     double expectedPositiveOutput = std::tanh(expectedPositiveSum);
+     ASSERT_NEAR(outputPositive, expectedPositiveOutput, 1e-5) << "Failed to handle all positive inputs";
+
+     // Test 5: Extremely large inputs
+     std::vector<double> largeInputs = {1e10, 1e10, 1e10};
+     double outputLarge = node.activation_func(node.find_output(largeInputs));
+     // Since this might cause overflow issues, check if the output is not NaN or infinity
+     ASSERT_FALSE(std::isnan(outputLarge)) << "Output is NaN for extremely large inputs";
+     ASSERT_FALSE(std::isinf(outputLarge)) << "Output is infinity for extremely large inputs";
+
+     // Test 7: Inputs with NaN
+     std::vector<double> nanInputs = {0.5, std::nan(""), 0.7};
+     double outputNaN = node.activation_func(node.find_output(nanInputs));
+     ASSERT_TRUE(std::isnan(outputNaN)) << "Failed to handle NaN input value";
+
+     // Test 8: Inputs with infinity
+     std::vector<double> infInputs = {0.5, std::numeric_limits<double>::infinity(), 0.7};
+     double outputInf = node.find_output(infInputs);
+     ASSERT_TRUE(std::isinf(outputInf)) << "Failed to handle infinity input value";
+ }
+
+ /**
+  * @breif: test for activation function
+  */
+  TEST_F(NodeTest, ActivationFunction)
+  {
+      // Test 1: check if function is correct
+      NetworkNode* node = new NetworkNode(3);
+      double inputZero = 0.0;
+      double outputZero = node->activation_func(inputZero);
+      ASSERT_NEAR(outputZero, 0.0, 1e-5) << "Failed to calculate tanh(0) correctly";
+
+      // Test 2: Check for positive value
+      double inputPositive = 1.0;
+      double outputPositive = node->activation_func(inputPositive);
+      ASSERT_NEAR(outputPositive, std::tanh(1.0), 1e-5) << "Failed to calculate tanh(1) correctly";
+
+      // Test 3: Check for negative value
+      double inputNegative = -1.0;
+      double outputNegative = node->activation_func(inputNegative);
+      ASSERT_NEAR(outputNegative, std::tanh(-1.0), 1e-5) << "Failed to calculate tanh(-1) correctly";
+
+      // Test 4: Check for large positive value
+      double inputLargePositive = 1000.0;
+      double outputLargePositive = node->activation_func(inputLargePositive);
+      ASSERT_NEAR(outputLargePositive, 1.0, 1e-5) << "Failed to handle large positive input correctly";
+
+      // Test 5: Check for large negative value
+      double inputLargeNegative = -1000.0;
+      double outputLargeNegative = node->activation_func(inputLargeNegative);
+      ASSERT_NEAR(outputLargeNegative, -1.0, 1e-5) << "Failed to handle large negative input correctly";
+  }

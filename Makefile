@@ -1,6 +1,6 @@
 # Variables
 CXX = g++
-CXXFLAGS = -std=c++14 -I/opt/homebrew/opt/googletest/include -Iarch/node/headr
+CXXFLAGS = -std=c++14 -I/opt/homebrew/opt/googletest/include -Iarch/node/headr -I/opt/homebrew/opt/eigen/include/eigen3
 LDFLAGS = -L/opt/homebrew/opt/googletest/lib -lgtest -lgtest_main -pthread
 
 # Directories

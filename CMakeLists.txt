@@ -7,9 +7,11 @@ project(COG_BIAS_MODEL)
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 14)
 
+find_package(Eigen3 REQUIRED)
 # Include directories
 include_directories(arch/node/headr)
 include_directories(/opt/homebrew/opt/googletest/include)
+include_directories(/opt/homebrew/opt/eigen/include/eigen3)
 
 # src test files
 file(GLOB NODE_SRC "./arch/node/src/*.cpp")

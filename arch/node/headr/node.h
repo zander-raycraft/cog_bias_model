@@ -68,7 +68,7 @@ class NetworkNode
          * @param nodeInfo -> type: double, the weighted sum of inputs plus bias
          * @return formattedOutput -> type: double, the result of applying the activation function
          */
-        double activation_func(double nodeInfo) noexcept;
+        static double activation_func(double nodeInfo) noexcept;
 
         /**
          * 

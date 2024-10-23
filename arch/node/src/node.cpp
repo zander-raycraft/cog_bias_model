@@ -1,8 +1,14 @@
 #include "../headr/node.h"
 #include <cmath>
-#include <cstdlib>
 #include <stdexcept>
+#include <random>
+#include <Eigen/Dense>
 
+
+// GLOBAL VARS
+std::random_device seedGen;
+std::mt19937 generate(seedGen());
+std::uniform_real_distribution<> distribution(-1.0, 1.0);
 
 /**
  * 
@@ -23,9 +29,9 @@ NetworkNode::NetworkNode(int inputs)
         }
         for(int i = 0; i < inputs; i++)
         {
-            weightVec[i] = (std::rand() / double(RAND_MAX)) * 2 - 1;
+            weightVec[i] = distribution(generate);
         }
-        biasVal = ((std::rand() / double(RAND_MAX)) * 2 - 1);
+        biasVal = distribution(generate);
 
     } catch (const std::length_error& e)
     {
@@ -56,9 +62,9 @@ NetworkNode::NetworkNode(int inNum, int outNum)
         // make weights random
         for(int i = 0; i < inNum; i++)
         {
-            weightVec.push_back((std::rand() / double(RAND_MAX)) * 2 - 1);
+            weightVec.push_back(distribution(generate));
         }
-        biasVal = ((std::rand() / double(RAND_MAX)) * 2 - 1);
+        biasVal = (distribution(generate));
     } catch (const std::length_error& e)
     {
         if(inNum <= 0)
@@ -116,9 +122,9 @@ NetworkNode& NetworkNode::operator=(const NetworkNode& base) noexcept {
  * 
  * @breif: destructor for the networkNode class
  */
-NetworkNode::~NetworkNode() noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
+NetworkNode::~NetworkNode() noexcept
 {
-
+    weightVec.clear();
 }
 
 
@@ -130,16 +136,24 @@ NetworkNode::~NetworkNode() noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
  * @return: output -> type: double, calculated output post weighted sum, bias, and
  *                      activation function
  */
-double NetworkNode::find_output(const std::vector<double>& inputs) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
-{
-    double sum = 0;
-    for(int i = 0; i < inputs.size(); ++i)
-    {
-        sum += inputs[i] * weightVec[i];
+double NetworkNode::find_output(const std::vector<double>& inputs) noexcept {
+    try {
+        if (inputs.size() != weightVec.size()) {
+            throw std::invalid_argument("Input vector size does not match weight vector size");
+        }
+
+        // Convert inputs and weight vector to Eigen vectors
+        Eigen::VectorXd inputVec = Eigen::Map<const Eigen::VectorXd>(inputs.data(), inputs.size());
+        Eigen::VectorXd weightVecEigen = Eigen::Map<const Eigen::VectorXd>(weightVec.data(), weightVec.size());
+        double weightedSum = weightVecEigen.dot(inputVec) + biasVal;
+
+        // Apply activation function and store the output
+        return weightedSum;
+
+    } catch (const std::exception& e) {
+        return 0.0;
     }
-    sum += biasVal;
-    return (output = activation_func(sum));
-};
+}
 
 /**
  * 
@@ -148,7 +162,7 @@ double NetworkNode::find_output(const std::vector<double>& inputs) noexcept // N
  * @param nodeInfo -> type: double, the weighted sum of inputs plus bias
  * @return formattedOutput -> type: double, the result of applying the activation function
  */
-double NetworkNode::activation_func(double nodeInfo) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}}
+double NetworkNode::activation_func(double nodeInfo) noexcept
 {
     return std::tanh(nodeInfo);
 };
