@@ -148,6 +148,7 @@ double NetworkNode::find_output(const std::vector<double>& inputs) noexcept {
         double weightedSum = weightVecEigen.dot(inputVec) + biasVal;
 
         // Apply activation function and store the output
+        output = activation_func(weightedSum);
         return weightedSum;
 
     } catch (const std::exception& e) {
@@ -173,7 +174,7 @@ double NetworkNode::activation_func(double nodeInfo) noexcept
  * 
  * @return nodeOutput -> type: double, the nodes outptut
  */
-double NetworkNode::get() const noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
+double NetworkNode::get() const noexcept
 {
     return output;
 };

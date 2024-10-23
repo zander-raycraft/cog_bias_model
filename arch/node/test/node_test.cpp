@@ -307,31 +307,78 @@ TEST_F(NodeTest, Destructor)
  /**
   * @breif: test for activation function
   */
-  TEST_F(NodeTest, ActivationFunction)
-  {
-      // Test 1: check if function is correct
-      auto* node = new NetworkNode(3);
-      double inputZero = 0.0;
-      double outputZero = node->activation_func(inputZero);
-      ASSERT_NEAR(outputZero, 0.0, 1e-5) << "Failed to calculate tanh(0) correctly";
+  TEST_F(NodeTest, ActivationFunction) {
+    // Test 1: check if function is correct
+    auto *node = new NetworkNode(3);
+    double inputZero = 0.0;
+    double outputZero = node->activation_func(inputZero);
+    ASSERT_NEAR(outputZero, 0.0, 1e-5) << "Failed to calculate tanh(0) correctly";
 
-      // Test 2: Check for positive value
-      double inputPositive = 1.0;
-      double outputPositive = node->activation_func(inputPositive);
-      ASSERT_NEAR(outputPositive, std::tanh(1.0), 1e-5) << "Failed to calculate tanh(1) correctly";
+    // Test 2: Check for positive value
+    double inputPositive = 1.0;
+    double outputPositive = node->activation_func(inputPositive);
+    ASSERT_NEAR(outputPositive, std::tanh(1.0), 1e-5) << "Failed to calculate tanh(1) correctly";
 
-      // Test 3: Check for negative value
-      double inputNegative = -1.0;
-      double outputNegative = node->activation_func(inputNegative);
-      ASSERT_NEAR(outputNegative, std::tanh(-1.0), 1e-5) << "Failed to calculate tanh(-1) correctly";
+    // Test 3: Check for negative value
+    double inputNegative = -1.0;
+    double outputNegative = node->activation_func(inputNegative);
+    ASSERT_NEAR(outputNegative, std::tanh(-1.0), 1e-5) << "Failed to calculate tanh(-1) correctly";
 
-      // Test 4: Check for large positive value
-      double inputLargePositive = 1000.0;
-      double outputLargePositive = node->activation_func(inputLargePositive);
-      ASSERT_NEAR(outputLargePositive, 1.0, 1e-5) << "Failed to handle large positive input correctly";
+    // Test 4: Check for large positive value
+    double inputLargePositive = 1000.0;
+    double outputLargePositive = node->activation_func(inputLargePositive);
+    ASSERT_NEAR(outputLargePositive, 1.0, 1e-5) << "Failed to handle large positive input correctly";
 
-      // Test 5: Check for large negative value
-      double inputLargeNegative = -1000.0;
-      double outputLargeNegative = node->activation_func(inputLargeNegative);
-      ASSERT_NEAR(outputLargeNegative, -1.0, 1e-5) << "Failed to handle large negative input correctly";
-  }
+    // Test 5: Check for large negative value
+    double inputLargeNegative = -1000.0;
+    double outputLargeNegative = node->activation_func(inputLargeNegative);
+    ASSERT_NEAR(outputLargeNegative, -1.0, 1e-5) << "Failed to handle large negative input correctly";
+}
+
+/**
+ * @breif: test for the get function
+ */
+TEST_F(NodeTest, Get)
+{
+    // Test 1: check if function is correct after default initalization
+    auto* node = new NetworkNode(3);
+    double output = node->get();
+    ASSERT_EQ(output, 0.0) << "Failed to get the correct initial output value";
+
+    // Test 2: Get value after calculating output
+    std::vector<double> inputs = {0.5, -0.3, 0.7};
+    node->find_output(inputs);
+    double calculatedOutput = node->get();
+    ASSERT_NEAR(calculatedOutput, std::tanh(node->find_output(inputs)), 1e-5) << "Failed to get the correct calculated output value";
+
+    // Test 3: Get value after setting bias and recalculating output
+    node->set(0.5);
+    node->find_output(inputs);
+    double outputAfterBiasSet = node->get();
+    ASSERT_NEAR(outputAfterBiasSet, std::tanh(node->find_output(inputs)), 1e-5) << "Failed to get the correct output value after setting bias";
+
+    delete node;
+}
+
+/**
+ * @breif: test for the set function
+ */
+TEST_F(NodeTest, Set)
+{
+    // Test 1: check if function is correct after default initialization
+    auto* node = new NetworkNode(3);
+    node->set(0.5);
+    ASSERT_EQ(node->getBiasVal(), .5) << "Failed to set bias to a positive value correctly";
+
+    // Test 2: Set value after calculating output
+    double newBias = -0.75;
+    node->set(newBias);
+    ASSERT_EQ(node->getBiasVal(), newBias) << "Failed to set bias to a negative value correctly";
+
+    // Test 3: Check if bias is set correctly to zero
+    newBias = 0.0;
+    node->set(newBias);
+    ASSERT_EQ(node->getBiasVal(), newBias) << "Failed to set bias to zero correctly";
+    delete node;
+}
+
