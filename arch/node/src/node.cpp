@@ -1,35 +1,134 @@
 #include "../headr/node.h"
 #include <cmath>
 #include <cstdlib>
-#include <ctime>
+#include <stdexcept>
 
 
 /**
  * 
- * @breif: default constructor for the node, intializes all weights to be random
+ * @breif: default constructor for the node, initializes all weights to be random
  * 
  * @param: inputs -> type: int, the number of input connections coming into this node
  * s
  */
 NetworkNode::NetworkNode(int inputs)
-        : weightVec(inputs), biasVal(0.0), output(0.0)
+        : weightVec(inputs), biasVal(0.0), output(0.0), numOutput(1)
 {
-    // Set the weights to random values
-    for(int i = 0; i < inputs; i++)
+    try
     {
-        weightVec[i] = (std::rand() / double(RAND_MAX)) * 2 - 1;
+        // Set the weights to random values
+        if (inputs <= 0)
+        {
+            throw std::invalid_argument("Number of inputs must be greater than 0.");
+        }
+        for(int i = 0; i < inputs; i++)
+        {
+            weightVec[i] = (std::rand() / double(RAND_MAX)) * 2 - 1;
+        }
+        biasVal = ((std::rand() / double(RAND_MAX)) * 2 - 1);
+
+    } catch (const std::length_error& e)
+    {
+        throw std::invalid_argument("NetworkNode constructor failed");
     }
-    biasVal = ((std::rand() / double(RAND_MAX)) * 2 - 1);
+}
+
+/**
+ *
+ * @breif: alternative constructor
+ *
+ * @param: inNum -> type: int, number of inputs
+ * @param: outNum -> type: int, number of outputs
+ *
+ */
+NetworkNode::NetworkNode(int inNum, int outNum)
+        : weightVec(), biasVal(0.0), output(0.0), numOutput(outNum)
+{
+    try
+    {
+        if(inNum <= 0 || outNum <= 0)
+        {
+            throw std::invalid_argument("NetworkNode constructor failed");
+        }
+
+        // dynamic memory allocation for vec
+        weightVec.reserve(inNum);
+        // make weights random
+        for(int i = 0; i < inNum; i++)
+        {
+            weightVec.push_back((std::rand() / double(RAND_MAX)) * 2 - 1);
+        }
+        biasVal = ((std::rand() / double(RAND_MAX)) * 2 - 1);
+    } catch (const std::length_error& e)
+    {
+        if(inNum <= 0)
+        {
+            throw std::invalid_argument("NetworkNode constructor failed");
+        }
+    }
+}
+
+/**
+ *
+ * @brief: copy constructor for node (deep copy, noexcept safe)
+ *
+ * @param: base -> type: const NetworkNode&, node to copy;
+ *
+ */
+NetworkNode::NetworkNode(const NetworkNode& base) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
+        : weightVec(), biasVal(base.biasVal), output(base.output), numOutput(base.numOutput)
+{
+    try {
+        // deep copy: done by allocating memory and then copying the data
+        weightVec.reserve(base.weightVec.size());
+        weightVec.insert(weightVec.end(), base.weightVec.begin(), base.weightVec.end());
+    } catch (const std::exception& e) {
+        // alloc fault: clear vec to original state
+        weightVec.clear();
+        throw std::runtime_error("NetworkNode constructor failed");
+    }
+}
+
+/**
+ *
+ * @breif: assignment operator for the node class
+ *
+ * @param: base -> type: NetworkNode&, the node value being assigned to the caller node
+ * @return: NetworkNode& -> modified network node address
+ *
+ */
+NetworkNode& NetworkNode::operator=(const NetworkNode& base) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
+{
+    if (this != &base) {
+        try
+        {
+            std::vector<double> newWeightVec;
+            newWeightVec.reserve(base.weightVec.size());
+            newWeightVec.insert(newWeightVec.end(), base.weightVec.begin(), base.weightVec.end());
+
+            // update all values
+            weightVec = std::move(newWeightVec);
+            biasVal = base.biasVal;
+            output = base.output;
+            numOutput = base.numOutput;
+        } catch (const std::exception& e)
+        {
+            throw std::runtime_error("NetworkNode operator= failed");
+        }
+    }
+    return *this;
+
 }
 
 /**
  * 
  * @breif: destructor for the networkNode class
  */
-NetworkNode::~NetworkNode() noexcept
+NetworkNode::~NetworkNode() noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
 {
 
 }
+
 
 /**
  * 
@@ -39,7 +138,7 @@ NetworkNode::~NetworkNode() noexcept
  * @return: output -> type: double, calculated output post weighted sum, bias, and
  *                      activation function
  */
-double NetworkNode::find_output(const std::vector<double>& inputs) noexcept
+double NetworkNode::find_output(const std::vector<double>& inputs) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
 {
     double sum = 0;
     for(int i = 0; i < inputs.size(); ++i)
@@ -68,7 +167,7 @@ double NetworkNode::activation_func(double nodeInfo) noexcept
  * 
  * @return nodeOutput -> type: double, the nodes outptut
  */
-double NetworkNode::get() const noexcept
+double NetworkNode::get() const noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}
 {
     return output;
 };
@@ -76,7 +175,7 @@ double NetworkNode::get() const noexcept
 /**
  * @brief: set function for the biases
  */
-void NetworkNode::set(double newVal) noexcept
+void NetworkNode::set(double newVal) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}}}
 {
     biasVal = newVal;
 }

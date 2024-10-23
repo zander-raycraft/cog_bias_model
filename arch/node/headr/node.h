@@ -16,13 +16,23 @@ class NetworkNode
         NetworkNode(int num_in); //dfault ctor
 
         /**
+         *
+         * @breif: alternate constructor with defaulted output to be one
+         *
+         * @param: inNum -> type: int, number of inputs
+         * @param: outNum -> type: int, number of outputs
+         *
+         */
+         NetworkNode(int inNum, int outNum);
+
+        /**
          * 
          * @breif: copy constructor for node
          * 
          * @param: base -> type: NetworkNode&, node to copy;
          * 
          */
-        NetworkNode(const NetworkNode& base);
+        NetworkNode(const NetworkNode& base) noexcept;
 
         /**
          * 
@@ -74,16 +84,55 @@ class NetworkNode
         void set(double bias) noexcept;
 
         /**
-         * 
-         * @breif: friend function for the gtest file
-         * 
+         *
+         * @brief: getter function for the size of the weight vector
+         *
+         * @return: size_t -> type: size_t, the size of the weight vector
+         *
          */
-        friend void testNetworkNode(int inputNodes);
+        size_t getWeightVecSize() const noexcept { return weightVec.size(); }
+
+        /**
+         * @breif: getter function for the elements of the weight vector
+         *
+         * @param: index -> type: size_t, the index of the element
+         * @return: double -> type: double, the value of the element
+         *
+         */
+        double getWeightVecElement(size_t index) const noexcept { return weightVec.at(index); }
+
+        /**
+         *
+         * @brief: getter function for the bias value
+         *
+         * @return: double -> type: double, the bias value
+         *
+         */
+        double getBiasVal() const noexcept { return biasVal; }
+
+        /**
+         *
+         * @brief: getter function for the output
+         *
+         * @return: double -> type: double, the output
+         *
+         */
+        double getOutput() const noexcept { return output; }
+
+        /**
+         *
+         * @berif: getter function for the number of outputs
+         *
+         * @return: int -> type: int, the number of outputs
+         *
+         */
+         double getOutputNum() const noexcept { return numOutput; }
 
     private:
         std::vector<double> weightVec;
         double biasVal;
         double output;
+        int numOutput;
 };
 
 #endif
