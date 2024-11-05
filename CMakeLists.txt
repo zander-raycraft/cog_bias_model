@@ -18,7 +18,9 @@ file(GLOB NODE_SRC "./arch/node/src/*.cpp")
 file(GLOB NODE_TEST_SRC "./arch/node/test/*.cpp")
 
 # make executable
-add_executable(run_tests ${NODE_SRC} ${NODE_TEST_SRC})
+add_executable(run_tests ${NODE_SRC} ${NODE_TEST_SRC}
+        arch/layer/headr/layer.h
+        arch/layer/headr/layer.h)
 
 # Link Google Test libraries
 target_link_libraries(run_tests
