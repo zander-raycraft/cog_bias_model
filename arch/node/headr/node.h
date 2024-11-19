@@ -4,6 +4,7 @@
 #include <vector>
 
 
+
 /**
  *
  * THINGS TO ADD:
@@ -11,7 +12,12 @@
  * - make sure data is neutral -> no introduction of biases during training
  * - weight freezing for post training
  *
+ * NOTES FOR NEXT TIME I WORK ON THIS:
+ * - I added the template type so all the tests are going to fail, fix that in node.h
+ *  - it isnt broken it just isnt completed and I have to clock into work so I dont have time to fix it...
  */
+
+
 /**
  *  @struct: BaseNode -> feedforward model node
  */
@@ -26,26 +32,21 @@
 
 /**
  * @struct: LstmNode -> LSTM node model
+ *
+ * @values:
+ *     LongTermState -> type: double, the long term state of the node
+ *     ShortTermStare -> type: double, the short term state of the node
+ *     forgetVals -> type: vector<double>, the weights and bias of the forget gate
+ *     inputVals -> type: vector<double>, the weights and bias of the input gate
+ *     outputVals -> type: vector<double>, the weights and bias of the output gate
  */
  struct LstmNode:BaseNode
              {
                  double LongTermState = 0.0;
                  double ShortTermState = 0.0;
-
-
-                 /**
-                  * @breif: forgetGate -> type: double, the forget gate value
-                  *
-                  * @param:
-                  */
-//                  double forgetGate(double inputInfo) noexcept
-//                  {
-//
-//                  };
-                 // input layer
-
-                 // output layer
-
+                 std::vector<double> forgetVals = std::vector<double>(3, 0.0);
+                 std::vector<double> inputVals = std::vector<double>(3, 0.0);
+                 std::vector<double> outputVals = std::vector<double>(3, 0.0);
              };
 
 
@@ -56,7 +57,7 @@
  * @note: This node is made to be extendible to various number of inputs and outputs
  * 
  */
-
+template<typename NodeType>
 class NetworkNode 
 {
     public:
@@ -176,6 +177,7 @@ class NetworkNode
          double getOutputNum() const noexcept { return numOutput; }
 
     private:
+        NodeType node;
         std::vector<double> weightVec;
         double biasVal;
         double output;
