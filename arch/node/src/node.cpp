@@ -182,7 +182,7 @@ double NetworkNode::get() const noexcept
 /**
  * @brief: set function for the biases
  */
-void NetworkNode::set(double newVal) noexcept // NOT TESTED {{{{{{{{{{{{}}}}}}}}}}}}}}
+void NetworkNode::set(double newVal) noexcept
 {
     biasVal = newVal;
 }

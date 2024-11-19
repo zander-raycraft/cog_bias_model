@@ -2,6 +2,44 @@
 #define NODE_H
 
 #include <vector>
+
+/**
+ *  @struct: BaseNode -> feedforward model node
+ */
+ struct BaseNode
+         {
+             static double activation_func(double nodeInfo) noexcept
+             {
+                 return std::tanh(nodeInfo);
+             }
+
+         };
+
+/**
+ * @struct: LstmNode -> LSTM node model
+ */
+ struct LstmNode:BaseNode
+             {
+                 double LongTermState = 0.0;
+                 double ShortTermState = 0.0;
+
+
+                 /**
+                  * @breif: forgetGate -> type: double, the forget gate value
+                  *
+                  * @param:
+                  */
+//                  double forgetGate(double inputInfo) noexcept
+//                  {
+//
+//                  };
+                 // input layer
+
+                 // output layer
+
+             };
+
+
 /**
  * 
  * @class: NetworkNode -> base neuron for network
