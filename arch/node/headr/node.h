@@ -3,6 +3,15 @@
 
 #include <vector>
 
+
+/**
+ *
+ * THINGS TO ADD:
+ * - synthetic data learning (meta-learning)
+ * - make sure data is neutral -> no introduction of biases during training
+ * - weight freezing for post training
+ *
+ */
 /**
  *  @struct: BaseNode -> feedforward model node
  */
