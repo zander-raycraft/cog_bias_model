@@ -57,7 +57,7 @@
  * @note: This node is made to be extendible to various number of inputs and outputs
  * 
  */
-template<typename NodeType>
+//template<typename NodeType>
 class NetworkNode 
 {
     public:
@@ -177,7 +177,7 @@ class NetworkNode
          double getOutputNum() const noexcept { return numOutput; }
 
     private:
-        NodeType node;
+        //NodeType node;
         std::vector<double> weightVec;
         double biasVal;
         double output;
