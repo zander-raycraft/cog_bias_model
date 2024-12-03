@@ -176,6 +176,15 @@ class NetworkNode
          */
          double getOutputNum() const noexcept { return numOutput; }
 
+        /**
+         *
+         * @brief: getter function for the node base vals
+         *
+         * @return: NodeType -> type: NodeType, the node
+         *
+         */
+         NodeType& getNode() noexcept { return node; }
+
     private:
         NodeType node;
         std::vector<double> weightVec;
