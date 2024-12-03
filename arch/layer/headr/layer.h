@@ -36,7 +36,7 @@ class NetworkLayer
      *
      * @notes It fills vec with size num of nodes of either base or LSTM, then it fills information matrix with bias and val
      */
-    NetworkLayer(int size, NodeType nodeType);
+    NetworkLayer(int size, NodeType nodeType, bool isInputLayer, NetworkLayer<NodeType>* prev = nullptr) noexcept;
 
     /**
     *
@@ -94,11 +94,21 @@ class NetworkLayer
     */
     void setBias(const std::vector<double> biases) noexcept;
 
+    /**
+     *
+     * @breif this is a helper function for the ctor for the inputLayer
+     * @param values -> std::vec<double> values from the datafile to be run through the model
+     * @returns void
+     */
+     void setInputLayer(std::vector<double> values) noexcept;
+
 
     private:
         std::vector<NetworkNode<NodeType>> layerNodes;
         std::vector<double> LayerOutputVec;
-        std::vector<std::vector<std::pair<double, double>>> LayerInputMatrix;
+        std::vector<double> LayerWeights;
+        std::vector<double> LayerInputs;
+        NetworkLayer* prevLayer;
 };
 
 #endif

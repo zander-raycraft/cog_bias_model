@@ -21,7 +21,8 @@ file(GLOB NODE_TEST_SRC "./arch/node/test/*.cpp")
 add_executable(run_tests ${NODE_SRC} ${NODE_TEST_SRC}
         arch/layer/headr/layer.h
         arch/layer/headr/layer.h
-        arch/node/test/node_test_LSTM.cpp)
+        arch/node/test/node_test_LSTM.cpp
+        arch/layer/src/layer.cpp)
 
 # Link Google Test libraries
 target_link_libraries(run_tests

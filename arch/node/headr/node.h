@@ -192,6 +192,20 @@ class NetworkNode
          */
          NodeType& getNode() noexcept { return node; }
 
+         /**
+          *
+          * @breif getter for nodes inputs to be modified, used in the layer.cpp file
+          *
+          */
+          std::vector<double>& getInputs() noexcept { return inputs; }
+
+         /**
+          *
+          * @breif: setterHelperFunction for setting a input node val used in layer.cpp
+          *
+          */
+          void setInputs(int index, double val) noexcept { inputs[index] = val; }
+
     private:
         NodeType node;
         std::vector<double> weightVec;
