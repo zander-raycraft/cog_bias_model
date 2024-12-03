@@ -150,6 +150,13 @@ class NetworkNode
         double getWeightVecElement(size_t index) const noexcept { return weightVec.at(index); }
 
         /**
+         * @breif: getter function for the weight vector
+         *
+         * @return: vector<double> -> type: vector<double>, the weight vector
+         */
+        std::vector<double> getWeightVec(size_t index) const noexcept { return weightVec; }
+
+        /**
          *
          * @brief: getter function for the bias value
          *
@@ -178,7 +185,7 @@ class NetworkNode
 
         /**
          *
-         * @brief: getter function for the node base vals
+         * @brief: getter function for the node base vals, struct specific vals
          *
          * @return: NodeType -> type: NodeType, the node
          *
@@ -188,9 +195,10 @@ class NetworkNode
     private:
         NodeType node;
         std::vector<double> weightVec;
+        std::vector<double> inputs;
+        int numOutput;
         double biasVal;
         double output;
-        int numOutput;
 };
 
 #endif

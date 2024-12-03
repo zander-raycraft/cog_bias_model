@@ -19,7 +19,7 @@ std::uniform_real_distribution<> distribution(-1.0, 1.0);
  */
 template <typename NodeType>
 NetworkNode<NodeType>::NetworkNode(int inputs)
-        : weightVec(inputs), biasVal(0.0), output(0.0), numOutput(1)
+        : weightVec(inputs), biasVal(0.0), output(0.0), numOutput(1), inputs(inputs, 0.0)
 {
     try
     {
