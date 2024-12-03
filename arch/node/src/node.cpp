@@ -17,7 +17,8 @@ std::uniform_real_distribution<> distribution(-1.0, 1.0);
  * @param: inputs -> type: int, the number of input connections coming into this node
  * s
  */
-NetworkNode::NetworkNode(int inputs)
+template <typename NodeType>
+NetworkNode<NodeType>::NetworkNode(int inputs)
         : weightVec(inputs), biasVal(0.0), output(0.0), numOutput(1)
 {
     try
@@ -47,7 +48,10 @@ NetworkNode::NetworkNode(int inputs)
  * @param: outNum -> type: int, number of outputs
  *
  */
-NetworkNode::NetworkNode(int inNum, int outNum)
+
+// MODIFY THE LOGIC
+template <typename NodeType>
+NetworkNode<NodeType>::NetworkNode(int inNum, int outNum)
         : weightVec(), biasVal(0.0), output(0.0), numOutput(outNum)
 {
     try
@@ -81,7 +85,8 @@ NetworkNode::NetworkNode(int inNum, int outNum)
  * @param: base -> type: const NetworkNode&, node to copy;
  *
  */
-NetworkNode::NetworkNode(const NetworkNode& base) noexcept
+template <typename NodeType>
+NetworkNode<NodeType>::NetworkNode(const NetworkNode& base) noexcept
         : weightVec(), biasVal(base.biasVal), output(base.output), numOutput(base.numOutput)
 {
     try {
@@ -103,7 +108,8 @@ NetworkNode::NetworkNode(const NetworkNode& base) noexcept
  * @return: NetworkNode& -> modified network node address
  *
  */
-NetworkNode& NetworkNode::operator=(const NetworkNode& base) noexcept {
+template <typename NodeType>
+NetworkNode<NodeType>& NetworkNode<NodeType>::operator=(const NetworkNode& base) noexcept {
     if (this != &base) {
         // Prepare newWeightVec and ensure it won't throw
         weightVec.clear();
@@ -122,7 +128,8 @@ NetworkNode& NetworkNode::operator=(const NetworkNode& base) noexcept {
  * 
  * @breif: destructor for the networkNode class
  */
-NetworkNode::~NetworkNode() noexcept
+template <typename NodeType>
+NetworkNode<NodeType>::~NetworkNode() noexcept
 {
     weightVec.clear();
 }
@@ -136,7 +143,8 @@ NetworkNode::~NetworkNode() noexcept
  * @return: output -> type: double, calculated output post weighted sum, bias, and
  *                      activation function
  */
-double NetworkNode::find_output(const std::vector<double>& inputs) noexcept {
+template <typename NodeType>
+double NetworkNode<NodeType>::find_output(const std::vector<double>& inputs) noexcept {
     try {
         if (inputs.size() != weightVec.size()) {
             throw std::invalid_argument("Input vector size does not match weight vector size");
@@ -163,7 +171,8 @@ double NetworkNode::find_output(const std::vector<double>& inputs) noexcept {
  * @param nodeInfo -> type: double, the weighted sum of inputs plus bias
  * @return formattedOutput -> type: double, the result of applying the activation function
  */
-double NetworkNode::activation_func(double nodeInfo) noexcept
+template <typename NodeType>
+double NetworkNode<NodeType>::activation_func(double nodeInfo) noexcept
 {
     return std::tanh(nodeInfo);
 };
@@ -174,7 +183,8 @@ double NetworkNode::activation_func(double nodeInfo) noexcept
  * 
  * @return nodeOutput -> type: double, the nodes outptut
  */
-double NetworkNode::get() const noexcept
+template <typename NodeType>
+double NetworkNode<NodeType>::get() const noexcept
 {
     return output;
 };
@@ -182,10 +192,14 @@ double NetworkNode::get() const noexcept
 /**
  * @brief: set function for the biases
  */
-void NetworkNode::set(double newVal) noexcept
+template <typename NodeType>
+void NetworkNode<NodeType>::set(double newVal) noexcept
 {
     biasVal = newVal;
 }
+
+template class NetworkNode<BaseNode>;
+template class NetworkNode<LstmNode>;
 
 
 

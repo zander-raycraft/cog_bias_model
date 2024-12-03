@@ -33,7 +33,7 @@ size_t getCurrentRSS()
 TEST_F(NodeTest, DefaultConstructor)
 {
     int numInputs = 5;
-    NetworkNode node(numInputs);
+    NetworkNode<BaseNode> node(numInputs);
 
     // Test 1: Check number of inputs
     EXPECT_EQ(node.getWeightVecSize(), numInputs) << "Failed to set the number of inputs";
@@ -57,8 +57,8 @@ TEST_F(NodeTest, DefaultConstructor)
     EXPECT_LE(node.getOutputNum(), 1) << "Output not correctly initialized";
 
     // Test 6: check to see if an invalid argument is thrown
-//    EXPECT_THROW(NetworkNode(0), std::invalid_argument) << "Invalid argument not thrown for 0 input";
-//    EXPECT_THROW(NetworkNode(-1), std::invalid_argument) << "Invalid argument not thrown for -1 input";
+//    EXPECT_THROW(NetworkNode<BaseNode>(0), std::invalid_argument) << "Invalid argument not thrown for 0 input";
+//    EXPECT_THROW(NetworkNode<BaseNode>(-1), std::invalid_argument) << "Invalid argument not thrown for -1 input";
 }
 
 /**
@@ -69,7 +69,7 @@ TEST_F(NodeTest, AlternateConstructor)
      // Test network
      int numInputs = 5;
      int numOutputs = 3;
-     auto* node = new NetworkNode(numInputs, numOutputs);
+     auto* node = new NetworkNode<BaseNode>(numInputs, numOutputs);
 
      // Test 1: check number of inputs
      EXPECT_EQ(node->getWeightVecSize(), numInputs) << "Failed to set the number of inputs";
@@ -94,15 +94,15 @@ TEST_F(NodeTest, AlternateConstructor)
 
      // Test 6: check and see if only one param is passed that the output num is 1;
      delete node;
-     auto* oneValNode = new NetworkNode(3);
+     auto* oneValNode = new NetworkNode<BaseNode>(3);
      EXPECT_EQ(oneValNode->getOutputNum(), 1) << "Failed to set the number of outputs";
      delete oneValNode;
 
      // Test 7: check to see if an invalid argument is thrown
-     EXPECT_THROW(NetworkNode(0, 1), std::invalid_argument) << "Invalid argument not thrown for 0 input";
-     EXPECT_THROW(NetworkNode(-1, 1), std::invalid_argument) << "Invalid argument not thrown for -1 input";
-     EXPECT_THROW(NetworkNode(1, 0), std::invalid_argument) << "Invalid argument not thrown for 0 output";
-     EXPECT_THROW(NetworkNode(1, -1), std::invalid_argument) << "Invalid argument not thrown for -1 output";
+     EXPECT_THROW(NetworkNode<BaseNode>(0, 1), std::invalid_argument) << "Invalid argument not thrown for 0 input";
+     EXPECT_THROW(NetworkNode<BaseNode>(-1, 1), std::invalid_argument) << "Invalid argument not thrown for -1 input";
+     EXPECT_THROW(NetworkNode<BaseNode>(1, 0), std::invalid_argument) << "Invalid argument not thrown for 0 output";
+     EXPECT_THROW(NetworkNode<BaseNode>(1, -1), std::invalid_argument) << "Invalid argument not thrown for -1 output";
 }
 
 /**
@@ -113,8 +113,8 @@ TEST_F(NodeTest, CopyConstructor)
     // Test network
     int numInputs = 5;
     int numOutputs = 3;
-    auto* node = new NetworkNode(numInputs, numOutputs);
-    auto* oneValNode = new NetworkNode(*node);
+    auto* node = new NetworkNode<BaseNode>(numInputs, numOutputs);
+    auto* oneValNode = new NetworkNode<BaseNode>(*node);
 
     // Test 1: check number of inputs
     EXPECT_EQ(oneValNode->getWeightVecSize(), numInputs) << "Failed to set the number of inputs";
@@ -154,8 +154,8 @@ TEST_F(NodeTest, CopyConstructor)
 TEST_F(NodeTest, AssignmentOperator)
 {
     // Test 1: check values
-    auto* nonCopyNode = new NetworkNode(5);
-    auto* copyNode = new NetworkNode(7);
+    auto* nonCopyNode = new NetworkNode<BaseNode>(5);
+    auto* copyNode = new NetworkNode<BaseNode>(7);
 
     *copyNode = *nonCopyNode;
     EXPECT_EQ(copyNode->getWeightVecSize(), 5) << "Failed in assignment scenario - weight size"; //Vec size
@@ -170,8 +170,8 @@ TEST_F(NodeTest, AssignmentOperator)
     delete copyNode;
 
     // Test 2: Checking assignment operator from different constructor calls
-    auto* oneParamNode = new NetworkNode(3);
-    auto* twoParamNode = new NetworkNode(5, 7);
+    auto* oneParamNode = new NetworkNode<BaseNode>(3);
+    auto* twoParamNode = new NetworkNode<BaseNode>(5, 7);
     *oneParamNode = *twoParamNode;
     EXPECT_EQ(oneParamNode->getWeightVecSize(), 5) << "Failed in double parameter constructor - vec size"; //Vec size
     EXPECT_EQ(oneParamNode->getOutputNum(), 7) << "Failed in double parameter constructor - output"; //Output num
@@ -184,7 +184,7 @@ TEST_F(NodeTest, AssignmentOperator)
     delete twoParamNode;
 
     // Test 3: self assignment
-    auto* selfNode = new NetworkNode(5);
+    auto* selfNode = new NetworkNode<BaseNode>(5);
     *selfNode = *selfNode;
     EXPECT_EQ(selfNode->getWeightVecSize(), 5) << "Failed in self-assignment scenario"; //Vec size
     EXPECT_EQ(selfNode->getOutputNum(), 1) << "Failed in self-assignment scenario"; //Output num
@@ -196,8 +196,8 @@ TEST_F(NodeTest, AssignmentOperator)
     delete selfNode;
 
     // Test 4: check if it is copying a smaller vector
-    auto* smallVecNode = new NetworkNode(3);
-    auto* bigVecNode = new NetworkNode(5, 7);
+    auto* smallVecNode = new NetworkNode<BaseNode>(3);
+    auto* bigVecNode = new NetworkNode<BaseNode>(5, 7);
     *smallVecNode = *bigVecNode;
     EXPECT_EQ(smallVecNode->getWeightVecSize(), 5) << "Failed in assigning smaller value - vec size"; //Vec size
     EXPECT_EQ(smallVecNode->getOutputNum(), 7) << "Failed in assigning smaller value - output num"; //Output num
@@ -227,7 +227,7 @@ TEST_F(NodeTest, Destructor)
     // Test 1: Does the vec get removed from memory
     size_t memoryBefore = getCurrentRSS();
 
-    auto* node = new NetworkNode(5);
+    auto* node = new NetworkNode<BaseNode>(5);
     size_t memoryAfterAllocation = getCurrentRSS();
     size_t allocatedMemory = memoryAfterAllocation - memoryBefore;
 
@@ -250,7 +250,7 @@ TEST_F(NodeTest, Destructor)
  TEST_F(NodeTest, FindOutput)
  {
      // Test 1: check if value is correctly calculated
-     NetworkNode node(3);
+     NetworkNode<BaseNode> node(3);
      std::vector<double> inputs = {0.5, -0.3, 0.7};
      double output = node.activation_func(node.find_output(inputs));
 
@@ -309,7 +309,7 @@ TEST_F(NodeTest, Destructor)
   */
   TEST_F(NodeTest, ActivationFunction) {
     // Test 1: check if function is correct
-    auto *node = new NetworkNode(3);
+    auto *node = new NetworkNode<BaseNode>(3);
     double inputZero = 0.0;
     double outputZero = node->activation_func(inputZero);
     ASSERT_NEAR(outputZero, 0.0, 1e-5) << "Failed to calculate tanh(0) correctly";
@@ -341,7 +341,7 @@ TEST_F(NodeTest, Destructor)
 TEST_F(NodeTest, Get)
 {
     // Test 1: check if function is correct after default initalization
-    auto* node = new NetworkNode(3);
+    auto* node = new NetworkNode<BaseNode>(3);
     double output = node->get();
     ASSERT_EQ(output, 0.0) << "Failed to get the correct initial output value";
 
@@ -366,7 +366,7 @@ TEST_F(NodeTest, Get)
 TEST_F(NodeTest, Set)
 {
     // Test 1: check if function is correct after default initialization
-    auto* node = new NetworkNode(3);
+    auto* node = new NetworkNode<BaseNode>(3);
     node->set(0.5);
     ASSERT_EQ(node->getBiasVal(), .5) << "Failed to set bias to a positive value correctly";
 
