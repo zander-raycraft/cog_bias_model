@@ -26,9 +26,9 @@ TEST_F(NetworkNodeLstmTest, Initialization)
     auto& internalNode = lstmNode.getNode();
     EXPECT_EQ(internalNode.LongTermState, 0.0) << "Long-term state not initialized to 0.";
     EXPECT_EQ(internalNode.ShortTermState, 0.0) << "Short-term state not initialized to 0.";
-    EXPECT_EQ(internalNode.forgetVals.size(), 3) << "Forget gate vector size mismatch.";
-    EXPECT_EQ(internalNode.inputVals.size(), 3) << "Input gate vector size mismatch.";
-    EXPECT_EQ(internalNode.outputVals.size(), 3) << "Output gate vector size mismatch.";
+    EXPECT_EQ(internalNode.forgetVals.size(), (2 * numInputs + 1)) << "Forget gate vector size mismatch.";
+    EXPECT_EQ(internalNode.inputVals.size(), (4 * numInputs + 2)) << "Input gate vector size mismatch.";
+    EXPECT_EQ(internalNode.outputVals.size(), (2 * numInputs + 1)) << "Output gate vector size mismatch.";
 }
 
 /**

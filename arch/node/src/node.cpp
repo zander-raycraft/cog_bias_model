@@ -34,6 +34,30 @@ NetworkNode<NodeType>::NetworkNode(int inputs)
         }
         biasVal = distribution(generate);
 
+        if constexpr(std::is_same<NodeType, LstmNode>::value)
+        {
+            // Set the weights to random values - forget
+            node.forgetVals.resize(2 * inputs + 1);
+            for(auto& weight : node.forgetVals)
+            {
+                weight = distribution(generate);
+            }
+
+            // Set the weights to random values - input
+            node.inputVals.resize(4 * inputs + 2);
+            for(auto& weight : node.forgetVals)
+            {
+                weight = distribution(generate);
+            }
+
+            // Set the weights to random values - output
+            node.outputVals.resize(2 * inputs + 1);
+            for(auto& weight : node.forgetVals)
+            {
+                weight = distribution(generate);
+            }
+        }
+
     } catch (const std::length_error& e)
     {
         throw std::invalid_argument("NetworkNode constructor failed");
@@ -150,6 +174,13 @@ double NetworkNode<NodeType>::find_output(const std::vector<double>& inputs) noe
             throw std::invalid_argument("Input vector size does not match weight vector size");
         }
 
+        if constexpr(std::is_same<NodeType, LstmNode>::value)
+        {
+            calcForgetGate();
+            calcInputGate();
+            output = calcOutputGate()[0];
+        }
+
         // Convert inputs and weight vector to Eigen vectors
         Eigen::VectorXd inputVec = Eigen::Map<const Eigen::VectorXd>(inputs.data(), inputs.size());
         Eigen::VectorXd weightVecEigen = Eigen::Map<const Eigen::VectorXd>(weightVec.data(), weightVec.size());
@@ -197,6 +228,108 @@ void NetworkNode<NodeType>::set(double newVal) noexcept
 {
     biasVal = newVal;
 }
+
+/**
+* @breif calculates the forget gate
+*
+* @param: weightsAndBias -> std::vector<double>, the weights and biases of this gate
+* @param: input -> int, the input value
+* @param: LTST -> std::pair<double, double>, the long and short term state of the node
+*
+* @return: double -> the new LT memory cell
+*/
+template <typename NodeType>
+double NetworkNode<NodeType>::calcForgetGate()
+{
+    if constexpr(std::is_same<NodeType, LstmNode>::value)
+    {
+        double runningSum = 0;
+        double b1 = node.forgetVals[node.forgetVals.size() - 1];
+        for(int i = 0; i < inputs.size(); i++)
+        {
+            double w1 = node.forgetVals[i * 2];
+            double w2 = node.forgetVals[i * 2 + 1];
+            runningSum += (w1 * inputs[i]) + (w2 * node.ShortTermState) + b1;
+        }
+        return(node.LongTermState *= (1.0/ (1.0 + std::exp(-runningSum))));
+
+    } else {
+        throw std::invalid_argument("Node is not an LstmNode");
+    }
+}
+
+/**
+* @breif calculates the input gate
+*
+* @param: input -> double, the input value
+*
+* @return: double -> the new LT memory cell
+*/
+template <typename NodeType>
+double NetworkNode<NodeType>::calcInputGate()
+{
+    if constexpr(std::is_same<NodeType, LstmNode>::value)
+    {
+        // sig side calculation
+        double b1 = node.inputVals[node.inputVals.size() - 2];
+        double b2 = node.inputVals[node.inputVals.size() - 1];
+        double runningSumSig = 0;
+        for(int i = 0; i < inputs.size(); i++)
+        {
+            double w1 = node.inputVals[i * 4];
+            double w2 = node.inputVals[i * 4 + 1];
+            runningSumSig += (w1 * inputs[i]) + (w2 * node.ShortTermState) + b1;
+        }
+        runningSumSig = (1.0 / (1.0 + std::exp(-runningSumSig)));
+
+        // tanh side calculation
+        double runningSumTanh = 0;
+        for(int i = 0; i < inputs.size(); i++)
+        {
+            double w3 = node.inputVals[i * 4 + 2];
+            double w4 = node.inputVals[i * 4 + 3];
+            runningSumTanh += (w3 * inputs[i]) + (w4 * node.ShortTermState) + b2;
+        }
+        runningSumTanh = std::tanh(runningSumTanh);
+        return(node.LongTermState += (runningSumSig * runningSumTanh));
+
+    } else {
+        throw std::invalid_argument("Node is not an LstmNode");
+    }
+}
+
+/**
+* @breif calculates the input gate
+*
+* @param: input -> int, the input value
+* @param: LTST -> std::pair<double, double>, the long and short term state of the node
+*
+* @return: std::vector<double> -> the new LT memory cell <output, LTM, STM>
+*/
+template <typename NodeType>
+std::vector<double> NetworkNode<NodeType>::calcOutputGate()
+{
+    if constexpr(std::is_same<NodeType, LstmNode>::value)
+    {
+        double runningSum = 0;
+        double b1 = node.outputVals[node.outputVals.size() - 1];
+        for(int i = 0; i < inputs.size(); i++)
+        {
+            double w1 = node.outputVals[i * 2];
+            double w2 = node.outputVals[i * 2 + 1];
+            runningSum += (w1 * inputs[i]) + (w2 * node.ShortTermState) + b1;
+        }
+        double result = std::tanh(node.LongTermState) * (1.0/ (1.0 + std::exp(-runningSum)));
+        node.ShortTermState = result;
+        return(std::vector<double>{result, result});
+
+
+    } else {
+        throw std::invalid_argument("Node is not an LstmNode");
+    }
+}
+
+
 
 template class NetworkNode<BaseNode>;
 template class NetworkNode<LstmNode>;

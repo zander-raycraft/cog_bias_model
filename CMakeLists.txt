@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.14)
 project(COG_BIAS_MODEL)
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 
 find_package(Eigen3 REQUIRED)
 # Include directories

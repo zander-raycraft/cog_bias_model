@@ -22,35 +22,47 @@ NetworkLayer<NodeType>::NetworkLayer(int size, NodeType nodeType, bool isInputLa
     // Initialize layer to be null
     prevLayer(prev)
 {
-        if(size != 0)
+        try
         {
-            // randomize the weights
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<> dis(-1.0, 1.0);
-            for(double& weight : LayerWeights)
+            if(size != 0)
             {
-                weight = dis(gen);
-            }
-
-            // connecting of layers in the base neural network
-            if(!isInputLayer && nodeType == NodeType::BaseNode)
-            {
-                // go through the output for each of the nodes in the last layer
-                for(auto node : layerNodes)
+                // randomize the weights
+                std::random_device rd;
+                std::mt19937 gen(rd());
+                std::uniform_real_distribution<> dis(-1.0, 1.0);
+                for(double& weight : LayerWeights)
                 {
-                    // input value for node = size of output vec in prev layer
-                    node.getInputs().resize(prevLayer->LayerOutputVec.size());
-                    // weight vec and input vec are the same for nodes
-                    for(int i = 0; i < node.getWeightVecSize(); i++)
+                    weight = dis(gen);
+                }
+
+                // connecting of layers in the base neural network
+                if(!isInputLayer && nodeType == NodeType::BaseNode)
+                {
+                    // go through the output for each of the nodes in the last layer
+                    for(auto node : layerNodes)
                     {
-                       node.setInputs(i, prevLayer->LayerOutputVec[i]);
+                        // input value for node = size of output vec in prev layer
+                        node.getInputs().resize(prevLayer->LayerOutputVec.size());
+                        // weight vec and input vec are the same for nodes
+                        for(int i = 0; i < node.getWeightVecSize(); i++)
+                        {
+                            node.setInputs(i, prevLayer->LayerOutputVec[i]);
+                        }
+                    }
+                } else if(nodeType == NodeType::LstmNode)
+                {
+                    if(!isInputLayer)
+                    {
+
                     }
                 }
-            }
-            // TODO: LSTM Make the connection and establishment of the layers in the LSTM netowrk
 
-        } else {
-            throw std::invalid_argument("Layer constructor failed");
+                // TODO: LSTM Make the connection and establishment of the layers in the LSTM netowrk
+
+            }
+
+        } catch(const std::invalid_argument& ia)
+        {
+            throw std::invalid_argument("NetworkLayer constructor failed");
         }
 }

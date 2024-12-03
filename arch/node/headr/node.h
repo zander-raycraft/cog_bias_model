@@ -44,9 +44,9 @@
              {
                  double LongTermState = 0.0;
                  double ShortTermState = 0.0;
-                 std::vector<double> forgetVals = std::vector<double>(3, 0.0);
-                 std::vector<double> inputVals = std::vector<double>(3, 0.0);
-                 std::vector<double> outputVals = std::vector<double>(3, 0.0);
+                 std::vector<double> forgetVals;
+                 std::vector<double> inputVals;
+                 std::vector<double> outputVals;
              };
 
 
@@ -205,6 +205,35 @@ class NetworkNode
           *
           */
           void setInputs(int index, double val) noexcept { inputs[index] = val; }
+
+
+          /**
+           * HELPER FUNCTIONS FOR THE LSTM NODE
+           */
+
+          /**
+           * @breif calculates the forget gate
+           *
+           * @param: inputs -> std::vector<double>, the input value
+           * @return: double -> the new LT memory cell
+           */
+           double calcForgetGate();
+
+           /**
+           * @breif calculates the input gate
+           *
+           * @param: inputs -> std::vector<double>, the input value
+           * @return: double -> the new LT memory cell
+           */
+           double calcInputGate();
+
+           /**
+           * @breif calculates the input gate
+           *
+           * @param: inputs -> std::vector<double>, the input value
+           * @return: std::vector<double> -> the new LT memory cell <output, LTM, STM>
+           */
+           std::vector<double> calcOutputGate();
 
     private:
         NodeType node;
