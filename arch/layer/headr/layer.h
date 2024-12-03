@@ -13,14 +13,9 @@
  * 1) First layer not getting any biases
  *
  * THINGS I NEED TO FIX
- *  LAST SESSION: I got the layer up, the .h, still need to do the .cpp and tests
- *                I need to fix the setInput thing and figure out algo for setting inputs in
- *                the matrix of pairs -> the idea is that each row represents the input values feeding into that node
- *                the size of the matrix will be size x num of inputs for first Node in layer, where the items in the
- *                matrix will be a double that thje first is the input and the second is the weight.
- *
- *                Make it to where the layers can be set up to not have biases if they are an input layer
- *                ???? maybe this can be done on the model level ?????
+ *  LAST SESSION: I got halfway through the layer.cpp constructor, I went back and revamped the logic for the nodes
+ *                  in the layer class and fixed the math for the LSTM node, now I need to make the connection and
+ *                  establishment of the LSTM layer then finish out the rest of the layer class and Gtests
  *
  */
 template <typename NodeType>
