@@ -15,12 +15,11 @@ NetworkLayer<NodeType>::NetworkLayer(int size, NodeType nodeType, bool isInputLa
     layerNodes(size, NetworkNode<NodeType>(1)),
     // Initialize the output vector to be of size, "size", and each element set to 0
     LayerOutputVec(size, 0),
-    // Initialize input vector to be size of size, "size", and each element set to 0
-    LayerInputs(size, 0),
     // Initialize the weight vector to be size of size, "size", each index 0 to be made random in body
     LayerWeights(size, 0),
     // Initialize layer to be null
-    prevLayer(prev)
+    prevLayer(prev),
+    informationMatrix(10, std::vector<double>(3, 0))
 {
         try
         {
@@ -53,16 +52,62 @@ NetworkLayer<NodeType>::NetworkLayer(int size, NodeType nodeType, bool isInputLa
                 {
                     if(!isInputLayer)
                     {
+                        //format the inputs with funciton
+                        dataLoad(prevLayer->informationMatrix);
 
                     }
                 }
-
-                // TODO: LSTM Make the connection and establishment of the layers in the LSTM netowrk
-
+                // NOTE: When calling this, you should call the dataFit funciton
             }
 
         } catch(const std::invalid_argument& ia)
         {
             throw std::invalid_argument("NetworkLayer constructor failed");
         }
+}
+
+/**
+ *
+ * @breif this function modifies the LSTM nodes to have properly formatted data between layers
+ * @param values -> std::vector<std::vector<double>> values from the datafile to be run through the model
+ * @return void
+ *
+ */
+template <typename NodeType>
+void NetworkLayer<NodeType>::dataLoadLstm(std::vector<std::vector<double>> values)
+{
+    if (!values.empty() || !values[0].empty())
+    {
+        std::vector<double> layerOutputs = values[0];
+        std::vector<double> stm = values[1];
+        std::vector<double> ltm = values[2];
+        for(const auto& mRow : values)
+        {
+            layerOutputs.push_back(mRow[0]);
+            stm.push_back(mRow[1]);
+            ltm.push_back(mRow[2]);
+        }
+        //Calculate the average of the vector
+        double stmSum = 0;
+        double ltmSum = 0;
+        for(int i = 0; i < stm.size(); i++)
+        {
+            stmSum += stm[i];
+            ltmSum += ltm[i];
+        }
+        double stmAvg = stmSum/stm.size();
+        double ltmAvg = ltmSum/ltm.size();
+
+        for(auto& node : layerNodes)
+        {
+            auto nodeInternal = node.getNode();
+            node.changeInputVecWhole(layerOutputs);
+            nodeInternal.LongTermState = ltmAvg;
+            nodeInternal.ShortTermState = stmAvg;
+        }
+
+    } else {
+        throw std::invalid_argument("NetworkLayer dataLoad failed");
+    }
+
 }

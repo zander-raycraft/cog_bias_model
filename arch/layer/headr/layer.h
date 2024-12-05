@@ -17,6 +17,10 @@
  *                  in the layer class and fixed the math for the LSTM node, now I need to make the connection and
  *                  establishment of the LSTM layer then finish out the rest of the layer class and Gtests
  *
+ *
+ *                  think about applying information entropy -> if oyu have exp listening to harmonic freqeuncies, you can
+ *                  get more information from listening to jazz cords
+ *
  */
 template <typename NodeType>
 class NetworkLayer
@@ -94,16 +98,26 @@ class NetworkLayer
      * @breif this is a helper function for the ctor for the inputLayer
      * @param values -> std::vec<double> values from the datafile to be run through the model
      * @returns void
+     *
      */
      void setInputLayer(std::vector<double> values) noexcept;
+
+     /**
+      *
+      * @breif this function modifies the LSTM nodes to have properly formatted data between layers
+      * @param values -> std::vector<std::vector<double>> values from the datafile to be run through the model
+      * @return void
+      *
+      */
+     void dataLoadLstm(std::vector<std::vector<double>> values);
 
 
     private:
         std::vector<NetworkNode<NodeType>> layerNodes;
         std::vector<double> LayerOutputVec;
         std::vector<double> LayerWeights;
-        std::vector<double> LayerInputs;
         NetworkLayer* prevLayer;
+        std::vector<std::vector<double>> informationMatrix;
 };
 
 #endif

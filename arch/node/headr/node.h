@@ -54,7 +54,7 @@
  * 
  * @class: NetworkNode -> base neuron for network
  *
- * @note: This node is made to be extendible to various number of inputs and outputs
+ * @note: This node is made to be extendable to various number of inputs and outputs
  * 
  */
 template<typename NodeType>
@@ -107,7 +107,7 @@ class NetworkNode
          * @return: output -> type: double, calculated output post weighted sum, bias, and
          *                      activation function
          */
-        double find_output(const std::vector<double>& inputs) noexcept;
+        double find_output(const std::vector<double>& inputs, double agreSTM = (0), double agreLTM = (0)) noexcept;
 
         /**
          * 
@@ -234,6 +234,8 @@ class NetworkNode
            * @return: std::vector<double> -> the new LT memory cell <output, LTM, STM>
            */
            std::vector<double> calcOutputGate();
+
+           void changeInputVecWhole(std::vector<double> vec) { inputs = vec; }
 
     private:
         NodeType node;

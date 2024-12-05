@@ -23,17 +23,6 @@ NetworkNode<NodeType>::NetworkNode(int inputs)
 {
     try
     {
-        // Set the weights to random values
-        if (inputs <= 0)
-        {
-            throw std::invalid_argument("Number of inputs must be greater than 0.");
-        }
-        for(int i = 0; i < inputs; i++)
-        {
-            weightVec[i] = distribution(generate);
-        }
-        biasVal = distribution(generate);
-
         if constexpr(std::is_same<NodeType, LstmNode>::value)
         {
             // Set the weights to random values - forget
@@ -57,6 +46,16 @@ NetworkNode<NodeType>::NetworkNode(int inputs)
                 weight = distribution(generate);
             }
         }
+        // Set the weights to random values
+        if (inputs <= 0)
+        {
+            throw std::invalid_argument("Number of inputs must be greater than 0.");
+        }
+        for(int i = 0; i < inputs; i++)
+        {
+            weightVec[i] = distribution(generate);
+        }
+        biasVal = distribution(generate);
 
     } catch (const std::length_error& e)
     {
@@ -168,7 +167,9 @@ NetworkNode<NodeType>::~NetworkNode() noexcept
  *                      activation function
  */
 template <typename NodeType>
-double NetworkNode<NodeType>::find_output(const std::vector<double>& inputs) noexcept {
+double NetworkNode<NodeType>::find_output(const std::vector<double>& inputs,
+                                          double agreSTM,
+                                          double agreLTM) noexcept {
     try {
         if (inputs.size() != weightVec.size()) {
             throw std::invalid_argument("Input vector size does not match weight vector size");
@@ -176,6 +177,10 @@ double NetworkNode<NodeType>::find_output(const std::vector<double>& inputs) noe
 
         if constexpr(std::is_same<NodeType, LstmNode>::value)
         {
+            // aggregated value of LTM cell based on average of inputs from prev cells
+            node.LongTermState = agreLTM;
+            // aggregated value of STM cell based on average of inputs from prev cells
+            node.ShortTermState = agreSTM;
             calcForgetGate();
             calcInputGate();
             output = calcOutputGate()[0];
