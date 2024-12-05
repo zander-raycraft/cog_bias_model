@@ -188,7 +188,8 @@ class NetworkNode
          * @return: NodeType -> type: NodeType, the node
          *
          */
-         NodeType& getNode() noexcept { return *node; }
+         NodeType& getNode() noexcept { return node; }
+         const NodeType& getNode() const noexcept { return node; }
 
          /**
           *
@@ -196,6 +197,7 @@ class NetworkNode
           *
           */
           std::vector<double>& getInputs() noexcept { return inputs; }
+          const std::vector<double>& getInputs() const noexcept { return inputs; }
 
          /**
           *
@@ -240,7 +242,7 @@ class NetworkNode
            }
 
     private:
-        std::unique_ptr<NodeType> node;
+        NodeType node;
         std::vector<double> weightVec;
         std::vector<double> inputs;
         int numOutput;

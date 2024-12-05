@@ -111,7 +111,7 @@ class NetworkLayer
       */
      void dataLoadLstm(std::vector<std::vector<double>> values);
 
-     std::vector<NetworkNode<NodeType>> getPrivMemberLayerNodes() const noexcept{ return layerNodes; }
+     const std::vector<NetworkNode<NodeType>>& getPrivMemberLayerNodes() const noexcept{ return layerNodes; }
      std::vector<double> getPrivMemberLayerWeights() const noexcept { return LayerWeights; }
      NetworkLayer* getPrivMemberPrevLayer() const noexcept { return prevLayer; }
 

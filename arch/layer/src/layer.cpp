@@ -21,6 +21,7 @@ NetworkLayer<NodeType>::NetworkLayer(int size, NodeType nodeType, bool isInputLa
         prevLayer(prev),
         informationMatrix(10, std::vector<double>(3, 0))
 {
+    std::cout << "LayerNodes initialized with size: " << layerNodes.size() << "\n";
     try
     {
         if(size != 0)
@@ -37,6 +38,11 @@ NetworkLayer<NodeType>::NetworkLayer(int size, NodeType nodeType, bool isInputLa
             // connecting of layers in the base neural network
             if(!isInputLayer)
             {
+                if (!prevLayer)
+                {
+                    throw std::logic_error("prevLayer cannot be nullptr for non-input layers.");
+                }
+
                 if constexpr (std::is_same<NodeType, BaseNode>::value)
                 {
                     // go through the output for each of the nodes in the last layer
@@ -82,12 +88,25 @@ void NetworkLayer<NodeType>::dataLoadLstm(std::vector<std::vector<double>> value
         // Validate input dimensions
         if (values.size() != 3 || values[0].empty())
         {
+            std::cerr << "Error: Invalid input dimensions or empty values passed to dataLoadLstm.\n";
             throw std::invalid_argument("NetworkLayer dataLoad failed: input dimensions invalid or empty values");
         }
 
         const std::vector<double>& layerOutputs = values[0];
         const std::vector<double>& stm = values[1];
         const std::vector<double>& ltm = values[2];
+
+        if (layerNodes.empty())
+        {
+            std::cerr << "Error: Layer nodes are uninitialized or empty.\n";
+            throw std::logic_error("Layer nodes are empty.");
+        }
+
+        if (layerNodes.size() != layerOutputs.size())
+        {
+            std::cerr << "Error: Mismatch between layerNodes size and input values size.\n";
+            throw std::logic_error("Mismatch between layer nodes and input size.");
+        }
 
         // Calculate averages for STM and LTM
         double stmSum = std::accumulate(stm.begin(), stm.end(), 0.0);
@@ -96,31 +115,29 @@ void NetworkLayer<NodeType>::dataLoadLstm(std::vector<std::vector<double>> value
         double stmAvg = stmSum / stm.size();
         double ltmAvg = ltmSum / ltm.size();
 
-        // Update each node in the layer
-        for (size_t nodeIdx = 0; nodeIdx < layerNodes.size(); ++nodeIdx)
-        {
-            auto& node = layerNodes[nodeIdx];
+        // Debug output
+        std::cout << "STM Avg: " << stmAvg << ", LTM Avg: " << ltmAvg << "\n";
 
+        // Update each node in the layer
+        for (size_t i = 0; i < layerNodes.size(); ++i)
+        {
             // Update the inputs for the node
-            node.getInputs().resize(layerOutputs.size());
-            for (size_t i = 0; i < layerOutputs.size(); ++i)
-            {
-                node.setInputs(i, layerOutputs[i]);
-            }
+            std::cout << "Updating node " << i << " with layer outputs.\n";
+            layerNodes[i].changeInputVecWhole(layerOutputs);
 
             // Update STM and LTM in the LstmNode struct inside the node
-            auto& nodeInternal = static_cast<LstmNode&>(node.getNode()); // Get the internal LstmNode
-
-            std::cout << "Before modification: LongTermState = " << nodeInternal.LongTermState << ", ShortTermState = " << nodeInternal.ShortTermState << std::endl;
-
+            auto& nodeInternal = static_cast<LstmNode&>(layerNodes[i].getNode());
             nodeInternal.LongTermState = ltmAvg;
             nodeInternal.ShortTermState = stmAvg;
 
-            std::cout << "After modification: LongTermState = " << nodeInternal.LongTermState << ", ShortTermState = " << nodeInternal.ShortTermState << std::endl;
+            // Debug output
+            std::cout << "Node " << i << " - LongTermState: " << nodeInternal.LongTermState
+                      << ", ShortTermState: " << nodeInternal.ShortTermState << "\n";
         }
     }
     else
     {
+        std::cerr << "Error: dataLoadLstm called on non-LstmNode layer.\n";
         throw std::logic_error("dataLoadLstm is only valid for LstmNode layers");
     }
 }
