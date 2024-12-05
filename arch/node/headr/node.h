@@ -48,8 +48,6 @@
                  std::vector<double> inputVals;
                  std::vector<double> outputVals;
              };
-
-
 /**
  * 
  * @class: NetworkNode -> base neuron for network

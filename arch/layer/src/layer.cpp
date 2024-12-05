@@ -6,39 +6,40 @@
  * @param size -> int, number of nodes in the layer
  * @param nodeType -> NodeType, type of nodes in the layer
  */
-
 template <typename NodeType>
 NetworkLayer<NodeType>::NetworkLayer(int size, NodeType nodeType, bool isInputLayer,
                                      NetworkLayer<NodeType>* prev) noexcept :
 
-    // Initialize the vector to be of size, "size", and have each element be a node with default of one input
-    layerNodes(size, NetworkNode<NodeType>(1)),
-    // Initialize the output vector to be of size, "size", and each element set to 0
-    LayerOutputVec(size, 0),
-    // Initialize the weight vector to be size of size, "size", each index 0 to be made random in body
-    LayerWeights(size, 0),
-    // Initialize layer to be null
-    prevLayer(prev),
-    informationMatrix(10, std::vector<double>(3, 0))
+// Initialize the vector to be of size, "size", and have each element be a node with default of one input
+        layerNodes(size, NetworkNode<NodeType>(1)),
+        // Initialize the output vector to be of size, "size", and each element set to 0
+        LayerOutputVec(size, 0),
+        // Initialize the weight vector to be size of size, "size", each index 0 to be made random in body
+        LayerWeights(size, 0),
+        // Initialize layer to be null
+        prevLayer(prev),
+        informationMatrix(10, std::vector<double>(3, 0))
 {
-        try
+    try
+    {
+        if(size != 0)
         {
-            if(size != 0)
+            // randomize the weights
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_real_distribution<> dis(-1.0, 1.0);
+            for(double& weight : LayerWeights)
             {
-                // randomize the weights
-                std::random_device rd;
-                std::mt19937 gen(rd());
-                std::uniform_real_distribution<> dis(-1.0, 1.0);
-                for(double& weight : LayerWeights)
-                {
-                    weight = dis(gen);
-                }
+                weight = dis(gen);
+            }
 
-                // connecting of layers in the base neural network
-                if(!isInputLayer && nodeType == NodeType::BaseNode)
+            // connecting of layers in the base neural network
+            if(!isInputLayer)
+            {
+                if constexpr (std::is_same<NodeType, BaseNode>::value)
                 {
                     // go through the output for each of the nodes in the last layer
-                    for(auto node : layerNodes)
+                    for(auto& node : layerNodes)
                     {
                         // input value for node = size of output vec in prev layer
                         node.getInputs().resize(prevLayer->LayerOutputVec.size());
@@ -48,23 +49,22 @@ NetworkLayer<NodeType>::NetworkLayer(int size, NodeType nodeType, bool isInputLa
                             node.setInputs(i, prevLayer->LayerOutputVec[i]);
                         }
                     }
-                } else if(nodeType == NodeType::LstmNode)
-                {
-                    if(!isInputLayer)
-                    {
-                        //format the inputs with funciton
-                        dataLoad(prevLayer->informationMatrix);
-
-                    }
                 }
-                // NOTE: When calling this, you should call the dataFit funciton
+                else if constexpr (std::is_same<NodeType, LstmNode>::value)
+                {
+                    //format the inputs with funciton
+                    dataLoadLstm(prevLayer->informationMatrix);
+                }
             }
-
-        } catch(const std::invalid_argument& ia)
-        {
-            throw std::invalid_argument("NetworkLayer constructor failed");
+            // NOTE: When calling this, you should call the dataFit funciton
         }
+
+    } catch(const std::invalid_argument& ia)
+    {
+        throw std::invalid_argument("NetworkLayer constructor failed");
+    }
 }
+
 
 /**
  *
@@ -76,38 +76,43 @@ NetworkLayer<NodeType>::NetworkLayer(int size, NodeType nodeType, bool isInputLa
 template <typename NodeType>
 void NetworkLayer<NodeType>::dataLoadLstm(std::vector<std::vector<double>> values)
 {
-    if (!values.empty() || !values[0].empty())
+    if constexpr (std::is_same<NodeType, LstmNode>::value)
     {
-        std::vector<double> layerOutputs = values[0];
-        std::vector<double> stm = values[1];
-        std::vector<double> ltm = values[2];
-        for(const auto& mRow : values)
+        if (!values.empty() && !values[0].empty())
         {
-            layerOutputs.push_back(mRow[0]);
-            stm.push_back(mRow[1]);
-            ltm.push_back(mRow[2]);
-        }
-        //Calculate the average of the vector
-        double stmSum = 0;
-        double ltmSum = 0;
-        for(int i = 0; i < stm.size(); i++)
-        {
-            stmSum += stm[i];
-            ltmSum += ltm[i];
-        }
-        double stmAvg = stmSum/stm.size();
-        double ltmAvg = ltmSum/ltm.size();
+            std::vector<double> layerOutputs = values[0];
+            std::vector<double> stm = values[1];
+            std::vector<double> ltm = values[2];
 
-        for(auto& node : layerNodes)
-        {
-            auto nodeInternal = node.getNode();
-            node.changeInputVecWhole(layerOutputs);
-            nodeInternal.LongTermState = ltmAvg;
-            nodeInternal.ShortTermState = stmAvg;
-        }
+            // Calculate averages for STM and LTM
+            double stmSum = 0;
+            double ltmSum = 0;
+            for (size_t i = 0; i < stm.size(); i++)
+            {
+                stmSum += stm[i];
+                ltmSum += ltm[i];
+            }
+            double stmAvg = stmSum / stm.size();
+            double ltmAvg = ltmSum / ltm.size();
 
-    } else {
-        throw std::invalid_argument("NetworkLayer dataLoad failed");
+            for (auto& node : layerNodes)
+            {
+                auto& nodeInternal = node.getNode(); // Reference to avoid copying
+                node.changeInputVecWhole(layerOutputs);
+                nodeInternal.LongTermState = ltmAvg;
+                nodeInternal.ShortTermState = stmAvg;
+            }
+        }
+        else
+        {
+            throw std::invalid_argument("NetworkLayer dataLoad failed: empty values");
+        }
     }
-
+    else
+    {
+        throw std::logic_error("dataLoadLstm is only valid for LstmNode layers");
+    }
 }
+
+template class NetworkLayer<BaseNode>;
+template class NetworkLayer<LstmNode>;
