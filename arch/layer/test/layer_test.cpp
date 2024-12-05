@@ -46,3 +46,64 @@ TEST_F(LayerTest, ConstructorTests)
         FAIL() << "Previous layer linkage check threw an exception: " << e.what();
     }
 }
+
+/**
+ * @brief: Tests for the dataLoadLstm function
+ */
+TEST_F(LayerTest, DataLoadLstmTests)
+{
+    // Test 1: Valid data loading for LstmNode
+    int numNodesLstm = 3;
+    NetworkLayer<LstmNode> lstmLayer(numNodesLstm, LstmNode(), true, nullptr);
+
+    std::vector<std::vector<double>> validData = {
+            {1.0, 2.0, 3.0}, // Layer outputs
+            {0.5, 0.6, 0.7}, // STM
+            {0.8, 0.9, 1.0}  // LTM
+    };
+
+    try {
+        lstmLayer.dataLoadLstm(validData);
+
+        // Check that each node in the layer has updated STM and LTM states
+        for (size_t nodeIdx = 0; nodeIdx < lstmLayer.getPrivMemberLayerNodes().size(); ++nodeIdx) {
+            auto& node = lstmLayer.getPrivMemberLayerNodes()[nodeIdx];
+            auto& nodeInternal = node.getNode(); // Access internal LstmNode
+
+            EXPECT_NEAR(nodeInternal.ShortTermState, 0.6, 1e-6) << "STM average not set correctly for node " << nodeIdx;
+            EXPECT_NEAR(nodeInternal.LongTermState, 0.9, 1e-6) << "LTM average not set correctly for node " << nodeIdx;
+
+            // Verify inputs are set correctly
+            const auto& inputs = node.getInputs();
+            ASSERT_EQ(inputs.size(), validData[0].size()) << "Input vector size mismatch for node " << nodeIdx;
+            for (size_t i = 0; i < inputs.size(); ++i) {
+                EXPECT_NEAR(inputs[i], validData[0][i], 1e-6) << "Mismatch in input value at index " << i;
+            }
+        }
+    } catch (const std::exception& e) {
+        FAIL() << "Valid data load threw an exception: " << e.what();
+    }
+
+    // Test 2: Empty data throws exception
+    std::vector<std::vector<double>> emptyData;
+    EXPECT_THROW({
+                     lstmLayer.dataLoadLstm(emptyData);
+                 }, std::invalid_argument) << "Empty data did not throw an exception";
+
+    // Test 3: Data with empty rows throws exception
+    std::vector<std::vector<double>> dataWithEmptyRows = {
+            {.7, .7, .7},
+            {0.5, 0.6, 0.7},
+            {0.8, 0.9, 1.0}
+    };
+    EXPECT_THROW({
+                     lstmLayer.dataLoadLstm(dataWithEmptyRows);
+                 }, std::invalid_argument) << "Data with empty rows did not throw an exception";
+
+    // Test 4: Logic error for BaseNode
+    NetworkLayer<BaseNode> baseLayer(3, BaseNode(), true, nullptr);
+    EXPECT_THROW({
+                     baseLayer.dataLoadLstm(validData);
+                 }, std::logic_error) << "Logic error not thrown for BaseNode";
+}
+

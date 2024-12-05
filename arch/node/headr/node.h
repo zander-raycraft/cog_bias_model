@@ -188,7 +188,7 @@ class NetworkNode
          * @return: NodeType -> type: NodeType, the node
          *
          */
-         NodeType& getNode() noexcept { return node; }
+         NodeType& getNode() noexcept { return *node; }
 
          /**
           *
@@ -233,10 +233,14 @@ class NetworkNode
            */
            std::vector<double> calcOutputGate();
 
-           void changeInputVecWhole(std::vector<double> vec) { inputs = vec; }
+           void changeInputVecWhole(std::vector<double> vec)
+           {
+               inputs.resize(vec.size());
+               inputs = vec;
+           }
 
     private:
-        NodeType node;
+        std::unique_ptr<NodeType> node;
         std::vector<double> weightVec;
         std::vector<double> inputs;
         int numOutput;

@@ -1,5 +1,6 @@
 #include "../headr/layer.h"
 #include <random>
+#include <iostream>
 
 /**
  * @brief Default constructor
@@ -78,34 +79,44 @@ void NetworkLayer<NodeType>::dataLoadLstm(std::vector<std::vector<double>> value
 {
     if constexpr (std::is_same<NodeType, LstmNode>::value)
     {
-        if (!values.empty() && !values[0].empty())
+        // Validate input dimensions
+        if (values.size() != 3 || values[0].empty())
         {
-            std::vector<double> layerOutputs = values[0];
-            std::vector<double> stm = values[1];
-            std::vector<double> ltm = values[2];
-
-            // Calculate averages for STM and LTM
-            double stmSum = 0;
-            double ltmSum = 0;
-            for (size_t i = 0; i < stm.size(); i++)
-            {
-                stmSum += stm[i];
-                ltmSum += ltm[i];
-            }
-            double stmAvg = stmSum / stm.size();
-            double ltmAvg = ltmSum / ltm.size();
-
-            for (auto& node : layerNodes)
-            {
-                auto& nodeInternal = node.getNode(); // Reference to avoid copying
-                node.changeInputVecWhole(layerOutputs);
-                nodeInternal.LongTermState = ltmAvg;
-                nodeInternal.ShortTermState = stmAvg;
-            }
+            throw std::invalid_argument("NetworkLayer dataLoad failed: input dimensions invalid or empty values");
         }
-        else
+
+        const std::vector<double>& layerOutputs = values[0];
+        const std::vector<double>& stm = values[1];
+        const std::vector<double>& ltm = values[2];
+
+        // Calculate averages for STM and LTM
+        double stmSum = std::accumulate(stm.begin(), stm.end(), 0.0);
+        double ltmSum = std::accumulate(ltm.begin(), ltm.end(), 0.0);
+
+        double stmAvg = stmSum / stm.size();
+        double ltmAvg = ltmSum / ltm.size();
+
+        // Update each node in the layer
+        for (size_t nodeIdx = 0; nodeIdx < layerNodes.size(); ++nodeIdx)
         {
-            throw std::invalid_argument("NetworkLayer dataLoad failed: empty values");
+            auto& node = layerNodes[nodeIdx];
+
+            // Update the inputs for the node
+            node.getInputs().resize(layerOutputs.size());
+            for (size_t i = 0; i < layerOutputs.size(); ++i)
+            {
+                node.setInputs(i, layerOutputs[i]);
+            }
+
+            // Update STM and LTM in the LstmNode struct inside the node
+            auto& nodeInternal = static_cast<LstmNode&>(node.getNode()); // Get the internal LstmNode
+
+            std::cout << "Before modification: LongTermState = " << nodeInternal.LongTermState << ", ShortTermState = " << nodeInternal.ShortTermState << std::endl;
+
+            nodeInternal.LongTermState = ltmAvg;
+            nodeInternal.ShortTermState = stmAvg;
+
+            std::cout << "After modification: LongTermState = " << nodeInternal.LongTermState << ", ShortTermState = " << nodeInternal.ShortTermState << std::endl;
         }
     }
     else

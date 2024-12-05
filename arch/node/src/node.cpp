@@ -19,29 +19,30 @@ std::uniform_real_distribution<> distribution(-1.0, 1.0);
  */
 template <typename NodeType>
 NetworkNode<NodeType>::NetworkNode(int inputs)
-        : weightVec(inputs), biasVal(0.0), output(0.0), numOutput(1), inputs(inputs, 0.0)
+        : node(std::make_unique<NodeType>()), weightVec(inputs), biasVal(0.0),
+            output(0.0), numOutput(1), inputs(inputs, 0.0)
 {
     try
     {
         if constexpr(std::is_same<NodeType, LstmNode>::value)
         {
             // Set the weights to random values - forget
-            node.forgetVals.resize(2 * inputs + 1);
-            for(auto& weight : node.forgetVals)
+            node->forgetVals.resize(2 * inputs + 1);
+            for(auto& weight : node->forgetVals)
             {
                 weight = distribution(generate);
             }
 
             // Set the weights to random values - input
-            node.inputVals.resize(4 * inputs + 2);
-            for(auto& weight : node.forgetVals)
+            node->inputVals.resize(4 * inputs + 2);
+            for(auto& weight : node->forgetVals)
             {
                 weight = distribution(generate);
             }
 
             // Set the weights to random values - output
-            node.outputVals.resize(2 * inputs + 1);
-            for(auto& weight : node.forgetVals)
+            node->outputVals.resize(2 * inputs + 1);
+            for(auto& weight : node->forgetVals)
             {
                 weight = distribution(generate);
             }
@@ -178,9 +179,9 @@ double NetworkNode<NodeType>::find_output(const std::vector<double>& inputs,
         if constexpr(std::is_same<NodeType, LstmNode>::value)
         {
             // aggregated value of LTM cell based on average of inputs from prev cells
-            node.LongTermState = agreLTM;
+            node->LongTermState = agreLTM;
             // aggregated value of STM cell based on average of inputs from prev cells
-            node.ShortTermState = agreSTM;
+            node->ShortTermState = agreSTM;
             calcForgetGate();
             calcInputGate();
             output = calcOutputGate()[0];
@@ -249,14 +250,14 @@ double NetworkNode<NodeType>::calcForgetGate()
     if constexpr(std::is_same<NodeType, LstmNode>::value)
     {
         double runningSum = 0;
-        double b1 = node.forgetVals[node.forgetVals.size() - 1];
+        double b1 = node->forgetVals[node->forgetVals.size() - 1];
         for(int i = 0; i < inputs.size(); i++)
         {
-            double w1 = node.forgetVals[i * 2];
-            double w2 = node.forgetVals[i * 2 + 1];
-            runningSum += (w1 * inputs[i]) + (w2 * node.ShortTermState) + b1;
+            double w1 = node->forgetVals[i * 2];
+            double w2 = node->forgetVals[i * 2 + 1];
+            runningSum += (w1 * inputs[i]) + (w2 * node->ShortTermState) + b1;
         }
-        return(node.LongTermState *= (1.0/ (1.0 + std::exp(-runningSum))));
+        return(node->LongTermState *= (1.0/ (1.0 + std::exp(-runningSum))));
 
     } else {
         throw std::invalid_argument("Node is not an LstmNode");
@@ -276,14 +277,14 @@ double NetworkNode<NodeType>::calcInputGate()
     if constexpr(std::is_same<NodeType, LstmNode>::value)
     {
         // sig side calculation
-        double b1 = node.inputVals[node.inputVals.size() - 2];
-        double b2 = node.inputVals[node.inputVals.size() - 1];
+        double b1 = node->inputVals[node->inputVals.size() - 2];
+        double b2 = node->inputVals[node->inputVals.size() - 1];
         double runningSumSig = 0;
         for(int i = 0; i < inputs.size(); i++)
         {
-            double w1 = node.inputVals[i * 4];
-            double w2 = node.inputVals[i * 4 + 1];
-            runningSumSig += (w1 * inputs[i]) + (w2 * node.ShortTermState) + b1;
+            double w1 = node->inputVals[i * 4];
+            double w2 = node->inputVals[i * 4 + 1];
+            runningSumSig += (w1 * inputs[i]) + (w2 * node->ShortTermState) + b1;
         }
         runningSumSig = (1.0 / (1.0 + std::exp(-runningSumSig)));
 
@@ -291,12 +292,12 @@ double NetworkNode<NodeType>::calcInputGate()
         double runningSumTanh = 0;
         for(int i = 0; i < inputs.size(); i++)
         {
-            double w3 = node.inputVals[i * 4 + 2];
-            double w4 = node.inputVals[i * 4 + 3];
-            runningSumTanh += (w3 * inputs[i]) + (w4 * node.ShortTermState) + b2;
+            double w3 = node->inputVals[i * 4 + 2];
+            double w4 = node->inputVals[i * 4 + 3];
+            runningSumTanh += (w3 * inputs[i]) + (w4 * node->ShortTermState) + b2;
         }
         runningSumTanh = std::tanh(runningSumTanh);
-        return(node.LongTermState += (runningSumSig * runningSumTanh));
+        return(node->LongTermState += (runningSumSig * runningSumTanh));
 
     } else {
         throw std::invalid_argument("Node is not an LstmNode");
@@ -317,15 +318,15 @@ std::vector<double> NetworkNode<NodeType>::calcOutputGate()
     if constexpr(std::is_same<NodeType, LstmNode>::value)
     {
         double runningSum = 0;
-        double b1 = node.outputVals[node.outputVals.size() - 1];
+        double b1 = node->outputVals[node->outputVals.size() - 1];
         for(int i = 0; i < inputs.size(); i++)
         {
-            double w1 = node.outputVals[i * 2];
-            double w2 = node.outputVals[i * 2 + 1];
-            runningSum += (w1 * inputs[i]) + (w2 * node.ShortTermState) + b1;
+            double w1 = node->outputVals[i * 2];
+            double w2 = node->outputVals[i * 2 + 1];
+            runningSum += (w1 * inputs[i]) + (w2 * node->ShortTermState) + b1;
         }
-        double result = std::tanh(node.LongTermState) * (1.0/ (1.0 + std::exp(-runningSum)));
-        node.ShortTermState = result;
+        double result = std::tanh(node->LongTermState) * (1.0/ (1.0 + std::exp(-runningSum)));
+        node->ShortTermState = result;
         return(std::vector<double>{result, result});
 
 
