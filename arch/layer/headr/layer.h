@@ -44,7 +44,7 @@ class NetworkLayer
     * @param: copyLayer -> type: NetworkLayer&, layer to copy;
     *
     */
-    //NetworkLayer(const NetworkLayer& copyLayer) noexcept;
+    NetworkLayer(const NetworkLayer& copyLayer) noexcept;
 
     /**
     *
@@ -53,7 +53,7 @@ class NetworkLayer
     * @param: copyLayer -> type: NetworkLayer&, layer to copy;
     *
     */
-    //NetworkLayer& operator=(const NetworkLayer& copyLayer) noexcept;
+    NetworkLayer& operator=(const NetworkLayer& copyLayer) noexcept;
 
     /**
     * @brief Destructor
@@ -67,7 +67,7 @@ class NetworkLayer
      *                  input matrix where each element is a pair of input value and weight.
     * @return updates the internal output vector (void)
     */
-    //void calculateLayerOutput(const std::vector<std::vector<std::pair<double, double>>>& inputVals) noexcept;
+    void calculateLayerOutput(const std::vector<std::vector<std::pair<double, double>>>& inputVals) noexcept;
 
     /**
     * @breif sets the input for the layer
@@ -75,7 +75,7 @@ class NetworkLayer
     * @params inputs -> const std::vector<double>&, input values to the layer
     * @returns updates the internal input vector (void)
     */
-    //void setInput(const std::vector<double>& inputs) noexcept;
+    void setInput(const std::vector<double>& inputs) noexcept;
 
     /**
      * @brief Updates weights for the layer during backpropagation
@@ -83,7 +83,7 @@ class NetworkLayer
      * @param weightUpdates -> const std::vector<std::vector<double>>&,
      *                         matrix of weight updates.
      */
-    //void updateWeights(const std::vector<std::vector<double>>& weightUpdates) noexcept;
+    void updateWeights(const std::vector<std::vector<double>>& weightUpdates) noexcept;
 
     /**
     * @breif set biases the bias for the layer
@@ -91,7 +91,7 @@ class NetworkLayer
     * @params biases -> const std::vector<double>&, biases for the layer
     * @returns updates the internal input vector (void)
     */
-    //void setBias(const std::vector<double> biases) noexcept;
+    void setBias(const std::vector<double> biases) noexcept;
 
     /**
      *
@@ -100,7 +100,7 @@ class NetworkLayer
      * @returns void
      *
      */
-     //void setInputLayer(std::vector<double> values) noexcept;
+     void setInputLayer(std::vector<double> values) noexcept;
 
      /**
       *

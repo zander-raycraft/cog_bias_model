@@ -148,22 +148,21 @@ class MusicDataGenerator:
         return dataset
 
 
-#Example usage
-# if __name__ == "__main__":
-#     generator = MusicDataGenerator()
-#
-#     # Generate different datasets
-#     classical_dataset = generator.generate_dataset(10, 'classical')
-#     jazz_dataset = generator.generate_dataset(10, 'jazz')
-#     mixed_dataset = generator.generate_dataset(10, 'mixed')
-#
-#     # Print example sequences
-#     print("Classical sequence example:")
-#     freq, score = classical_dataset[0]
-#     print(f"Frequencies: {[round(f, 2) for f in freq]}")
-#     print(f"Preference Score: {round(score, 3)}")
-#
-#     print("\nJazz sequence example:")
-#     freq, score = jazz_dataset[0]
-#     print(f"Frequencies: {[round(f, 2) for f in freq]}")
-#     print(f"Preference Score: {round(score, 3)}")
+if __name__ == "__main__":
+    generator = MusicDataGenerator()
+
+    # Generate different datasets
+    classical_dataset = generator.generate_dataset(10, 'classical')
+    jazz_dataset = generator.generate_dataset(10, 'jazz')
+    mixed_dataset = generator.generate_dataset(10, 'mixed')
+
+    # Print example sequences
+    print("Classical sequence example:")
+    freq, score = classical_dataset[0]
+    print(f"Frequencies: {[round(f, 2) for f in freq]}")
+    print(f"Preference Score: {round(score, 3)}")
+
+    print("\nJazz sequence example:")
+    freq, score = jazz_dataset[0]
+    print(f"Frequencies: {[round(f, 2) for f in freq]}")
+    print(f"Preference Score: {round(score, 3)}")
